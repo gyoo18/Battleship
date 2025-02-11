@@ -1,5 +1,13 @@
+import java.io.File;
+
+import graphiques.Fenêtre;
+
 public class App {
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+        Fenêtre fenêtre = new Fenêtre();
+
+        while (fenêtre.actif){
+            fenêtre.mettreÀJour();
+        }
     }
 }

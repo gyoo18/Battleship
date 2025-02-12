@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -109,20 +108,22 @@ public class Chargeur {
                         boolean estPos = false;
                         boolean estNorm = false;
                         boolean estUv = false;
-                        for (int e : indexesCLL){
-                            if (j%3==0){
-                                estPos = e==iPos;
-                            }
-                            if (j%3==1){
-                                estNorm = e==iNorm;
-                            }
-                            if (j%3==2){
-                                estUv = e==iUv;
-                                if (estPos && estNorm && estUv){
-                                    estPrésent = true;
-                                    indexesVLL.add(j/3);
-                                    break;
-                                }
+                        f : for (int e : indexesCLL){
+                            s : switch (j%3){
+                                case 0:
+                                    estPos = e==iPos;
+                                    break s;
+                                case 1:
+                                    estNorm = e==iNorm;
+                                    break s;
+                                case 2:
+                                    estUv = e==iUv;
+                                    if (estPos && estNorm && estUv){
+                                        estPrésent = true;
+                                        indexesVLL.add(j/3);
+                                        break f;
+                                    }
+                                    break s;
                             }
                             j++;
                         }

@@ -28,7 +28,8 @@ public class Peintre {
 	private Fenêtre fenêtre;
 
 	private Nuanceur nuanceur;
-	private Maillage[] maillage;
+	private Maillage[] maillages;
+	private Maillage maillage;
 
 	private Mat4 projection;
 	public Transformée vue;
@@ -48,13 +49,13 @@ public class Peintre {
 		GL46.glEnable(GL46.GL_DEPTH_TEST);
 		
 		try{
-			maillage = Chargeur.chargerOBJSéparé("assets/maillages/cube.obj");
+			//maillages = Chargeur.chargerOBJSéparé("assets/maillages/Stan_dragon.obj");
+			maillage = Chargeur.chargerOBJ("assets/maillages/Stan_dragon.obj");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		for (Maillage e : maillage){
-			e.construire();
-		}
+		//maillage = Maillage.fusionner(maillages);
+		maillage.construire();
 		
 		try{
 			nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaBase");
@@ -66,11 +67,10 @@ public class Peintre {
 		projection = Mat4.fairePerspective(0.01f, 100f, 70f, (float)fenêtre.largeurPixels/(float)fenêtre.hauteurPixels);
 		vue = new Transformée(new Vec3(0.5f,1f,-2f).opposé(), new Vec3(-0.1f,-0.1f,0).opposé(), new Vec3(1));
 		vue.mOrdre = Mat4.MOrdre.YXZ;
-		transformée = new Transformée();
+		transformée = new Transformée().échelonner(new Vec3(10f));
 
-		File image = new File("assets/textures/0007C.png");
 		try{
-			texture = Chargeur.chargerTexture("assets/textures/0007C.png");
+			texture = Chargeur.chargerTexture("assets/textures/Village_Demo.png");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -99,17 +99,17 @@ public class Peintre {
 		GL46.glActiveTexture(GL46.GL_TEXTURE0);
 		GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture.ID);
 		
-		for (Maillage e : maillage){
-			e.préparerAuDessin();
+		//for (Maillage e : maillage){
+			maillage.préparerAuDessin();
 
 			//transformée.tourner(new Vec3(0,0.01f,0));
 			
-			if (e.estIndexé){
-				GL46.glDrawElements(GL46.GL_TRIANGLES, e.NSommets, GL46.GL_UNSIGNED_INT, 0);
+			if (maillage.estIndexé){
+				GL46.glDrawElements(GL46.GL_TRIANGLES, maillage.NSommets, GL46.GL_UNSIGNED_INT, 0);
 			}else{
-				GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, e.NSommets);
+				GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, maillage.NSommets);
 			}
-		}
+		//}
 	}
 	
 	public void détruire() {

@@ -6,8 +6,13 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.lwjgl.opengl.GL46;
@@ -35,9 +40,9 @@ public class Maillage {
     private short[][] attributsShorts;
     private int[][] attributsInts;
     private long[][] attributsLongs;
-    private float[][] attributsFloats;
+    public float[][] attributsFloats;
     private double[][] attributsDoubles;
-    private int[] indexes;
+    public int[] indexes;
 
     /**
      * @param attributs Dictionnaire définissant combien il y aura d'attributs de chaque type
@@ -379,5 +384,309 @@ public class Maillage {
         for (int i = 0; i < attributsIndexes.length; i++){
             GL46.glEnableVertexAttribArray(i);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Maillage fusionner(Maillage[] m){
+
+        // Vérifier la compatibilité des maillages
+        HashMap<TypeDonnée,Integer> attributsMap = new HashMap<>();
+        for (int i = 0; i < m[0].attributsTypes.length; i++){
+            if (!attributsMap.keySet().contains(m[0].attributsTypes[i])){
+                attributsMap.put(m[0].attributsTypes[i], 1);
+            }else{
+                attributsMap.replace(m[0].attributsTypes[i],attributsMap.get(m[0].attributsTypes[i])+1);
+            }
+        }
+        for (int i = 1; i < m.length; i++){
+            if (m[i].attributsTypes.length != m[0].attributsTypes.length){
+                System.err.println("[Erreur] : Maillage.fusionner : Les maillages fournis doivent tous avoir le même nombre d'attributs du même type.");
+                return null;
+            }
+            HashMap<TypeDonnée,Integer> attributsMap2 = new HashMap<>();
+            for (int j = 0; j < m[i].attributsTypes.length; j++){
+                if (!attributsMap2.containsKey(m[i].attributsTypes[j])){
+                    attributsMap2.put(m[i].attributsTypes[j], 1);
+                }else{
+                    attributsMap2.replace(m[i].attributsTypes[j],attributsMap2.get(m[i].attributsTypes[j])+1);
+                }
+            }
+            for (TypeDonnée e : attributsMap.keySet()){
+                if (!attributsMap2.containsKey(e) || !attributsMap2.get(e).equals(attributsMap.get(e))){
+                    System.err.println("[Erreur] : Maillage.fusionner : Les maillages fournis doivent tous avoir le même nombre d'attributs du même type.");
+                    return null;
+                }
+            }
+        }
+
+        // Extraire la longueur des listes à instancier
+        Maillage résultat = new Maillage(attributsMap, m[0].estIndexé);
+        int NAttributs = m[0].attributsTypes.length;
+        int LAttributs = 0;
+        int LIndexes = 0;
+        for (int i = 0; i < m.length; i++) {
+            if (m[0].estIndexé){
+                LIndexes += m[i].indexes.length;
+            }
+            switch (m[i].attributsTypes[0]){
+                case BYTE:
+                    LAttributs += m[i].attributsBytes.length;
+                    continue;
+                case SHORT:
+                    LAttributs += m[i].attributsShorts.length;
+                    continue;
+                case INT:
+                    LAttributs += m[i].attributsInts.length;
+                    continue;
+                case LONG:
+                    LAttributs += m[i].attributsLongs.length;
+                    continue;
+                case FLOAT:
+                    LAttributs += m[i].attributsFloats.length;
+                    continue;
+                case DOUBLE:
+                    LAttributs += m[i].attributsDoubles.length;
+                    continue;
+            }
+        }
+
+        //Instancier les listes
+        @SuppressWarnings("rawtypes")
+        LinkedList[] attributs = new LinkedList[NAttributs];
+        TypeDonnée[] attributsTypes = new TypeDonnée[NAttributs];
+        for (int i = 0; i < attributs.length; i++){
+            switch (m[0].attributsTypes[i]) {
+                case BYTE:
+                    attributs[i] = new LinkedList<Byte>();
+                    attributsTypes[i] = TypeDonnée.BYTE;
+                    continue;
+                case SHORT:
+                    attributs[i] = new LinkedList<Short>();
+                    attributsTypes[i] = TypeDonnée.SHORT;
+                    continue;
+                case INT:
+                    attributs[i] = new LinkedList<Integer>();
+                    attributsTypes[i] = TypeDonnée.INT;
+                    continue;
+                case LONG:
+                    attributs[i] = new LinkedList<Long>();
+                    attributsTypes[i] = TypeDonnée.LONG;
+                    continue;
+                case FLOAT:
+                    attributs[i] = new LinkedList<Float>();
+                    attributsTypes[i] = TypeDonnée.FLOAT;
+                    continue;
+                case DOUBLE:
+                    attributs[i] = new LinkedList<Double>();
+                    attributsTypes[i] = TypeDonnée.DOUBLE;
+                    continue;
+            }
+        }
+        int[] indexes = new int[LIndexes];
+
+        //Transférer les données dans les listes
+        int indexesDécalageIndexes = 0;
+        int indexesDécalagesAttributs = 0;
+        for (int i = 0; i < m.length; i++){
+            for (int j = 0; j < m[i].attributsTypes.length; j++){
+                switch (m[i].attributsTypes[j]){
+                    case BYTE:{
+                        LinkedList<Byte> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.BYTE && attributs[k].size() == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsBytes[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsBytes[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                    case SHORT:{
+                        LinkedList<Short> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.SHORT && attributs[k].size() == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsShorts[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsShorts[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                    case INT:{
+                        LinkedList<Integer> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.INT && attributs[k].size() == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsInts[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsInts[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                    case LONG:{
+                        LinkedList<Long> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.LONG && attributs[k].size() == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsLongs[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsLongs[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                    case FLOAT:{
+                        LinkedList<Float> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.FLOAT && attributs[k].size()/m[0].attributsDimensions[k] == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsFloats[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsFloats[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                    case DOUBLE:{
+                        LinkedList<Double> attribut = null;
+                        for (int k = 0; k < attributs.length; k++){
+                            if (attributsTypes[k] == TypeDonnée.DOUBLE && attributs[k].size() == indexesDécalagesAttributs && m[0].attributsDimensions[k] == m[i].attributsDimensions[j]){
+                                attribut = attributs[k];
+                                break;
+                            }
+                        }
+                        if (attribut == null){
+                            System.err.println("[Erreur] Maillage.fusionner : Les maillages doivent posséder le même nombre d'attributs du même type");
+                            return null;
+                        }
+                        for (int k = 0; k < m[i].attributsDoubles[m[i].attributsIndexes[j]].length; k++){
+                            attribut.add(m[i].attributsDoubles[m[i].attributsIndexes[j]][k]);
+                        }
+                        continue;
+                    }
+                }
+            }
+            for (int j = 0; j < m[i].indexes.length; j++){
+                indexes[indexesDécalageIndexes + j] = m[i].indexes[j] + indexesDécalagesAttributs;
+            }
+            indexesDécalageIndexes += m[i].indexes.length;
+            switch (m[i].attributsTypes[0]) {
+                case BYTE:
+                    indexesDécalagesAttributs += m[i].attributsBytes[0].length/m[0].attributsDimensions[0];
+                    break;
+                case SHORT:
+                    indexesDécalagesAttributs += m[i].attributsShorts[0].length/m[0].attributsDimensions[0];
+                    break;
+                case INT:
+                    indexesDécalagesAttributs += m[i].attributsInts[0].length/m[0].attributsDimensions[0];
+                    break;
+                case LONG:
+                    indexesDécalagesAttributs += m[i].attributsLongs[0].length/m[0].attributsDimensions[0];
+                    break;
+                case FLOAT:
+                    indexesDécalagesAttributs += m[i].attributsFloats[0].length/m[0].attributsDimensions[0];
+                    break;
+                case DOUBLE:
+                    indexesDécalagesAttributs += m[i].attributsDoubles[0].length/m[0].attributsDimensions[0];
+                    break;
+            }
+        }
+
+        //Traduire les LinkedList en listes
+        for (int i = 0; i < m[0].attributsTypes.length; i++){
+            switch (m[0].attributsTypes[i]) {
+                case BYTE:{
+                    byte[] données = new byte[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Byte) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+                case SHORT:{
+                    short[] données = new short[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Short) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+                case INT:{
+                    int[] données = new int[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Integer) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+                case LONG:{
+                    long[] données = new long[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Long) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+                case FLOAT:{
+                    float[] données = new float[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Float) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+                case DOUBLE:{
+                    double[] données = new double[attributs[i].size()];
+                    int j = 0;
+                    for (Object e : attributs[i]){
+                        données[j] = (Double) e;
+                        j++;
+                    }
+                    résultat.ajouterAttributListe(données,m[0].attributsDimensions[i]);
+                    continue;
+                }
+            }
+        }
+        résultat.ajouterIndexesListe(indexes);
+
+        return résultat;
     }
 }

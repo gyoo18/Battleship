@@ -60,6 +60,13 @@ public class Fenêtre {
                 case GLFW.GLFW_KEY_S:
                     peintre.vue.translation(new Vec3(0.1f*(float)Math.sin(rot.y),0,-0.1f*(float)Math.cos(rot.y)).opposé());
                     break;
+                case GLFW.GLFW_KEY_SPACE:
+                    peintre.vue.translation(new Vec3(0,0.1f,0).opposé());
+                    break;
+                case GLFW.GLFW_KEY_LEFT_SHIFT:
+                case GLFW.GLFW_KEY_RIGHT_SHIFT:
+                    peintre.vue.translation(new Vec3(0,-0.1f,0).opposé());
+                    break;
             }
         }
         

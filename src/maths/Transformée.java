@@ -67,40 +67,46 @@ public class Transformée {
         return éch;
     }
 
-    public void positionner(Vec3 p){
+    public Transformée positionner(Vec3 p){
         pos = p.copier();
         posMat = new Mat4().translation(p);
         estModifié = true;
+        return this;
     }
 
-    public void faireRotation(Vec3 r){
+    public Transformée faireRotation(Vec3 r){
         rot = r.copier();
         rotMat = new Mat4().faireRotation(r, mOrdre);
         estModifié = true;
+        return this;
     }
 
-    public void faireÉchelle(Vec3 e){
+    public Transformée faireÉchelle(Vec3 e){
         éch = e.copier();
         échMat = new Mat4().faireÉchelle(e);
         estModifié = true;
+        return this;
     }
 
-    public void translation(Vec3 t){
+    public Transformée translation(Vec3 t){
         pos.addi(t);
         posMat.translation(t);
         estModifié = true;
+        return this;
     }
 
-    public void tourner(Vec3 r){
+    public Transformée tourner(Vec3 r){
         rot.addi(r);
         rotMat.tourner(r, mOrdre);
         estModifié = true;
+        return this;
     }
 
-    public void échelonner(Vec3 e){
+    public Transformée échelonner(Vec3 e){
         éch.mult(e);
         échMat.échelonner(e);
         estModifié = true;
+        return this;
     }
 
     public Mat4 avoirMat(){

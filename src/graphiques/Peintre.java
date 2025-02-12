@@ -19,16 +19,9 @@ import utils.Chargeur;
 public class Peintre {
 	
 	private Fenêtre fenêtre;
-	
-	private float[] positions = {
-			-1f,0f,-1f,
-			 1f,0f,-1f,
-			-1f,0f, 1f,
-			 1f,0f, 1f,
-	};
 
 	private Nuanceur nuanceur;
-	private Maillage maillage;
+	private Maillage[] maillage;
 
 	private Mat4 projection;
 	public Transformée vue;
@@ -42,16 +35,18 @@ public class Peintre {
 		
 		GL46.glViewport(0, 0, fenêtre.largeurPixels, fenêtre.hauteurPixels);
 		GL46.glClearColor(0.25f, 0.5f, 0.8f, 1f);
+
+		GL46.glEnable(GL46.GL_DEPTH_TEST);
 		
-		maillage = new Maillage(
-			Map.of(
-				Maillage.TypeDonnée.FLOAT, 1
-			),
-			true
-		);
-		maillage.ajouterAttributListe(positions, 3);
-		maillage.ajouterIndexesListe(new int[]{0,1,2,1,2,3});
-		maillage.construire();
+		try{
+			Maillage m = Chargeur.chargerOBJ("assets/maillages/classroomHeavy.obj");
+			maillage = Chargeur.chargerOBJSéparé("assets/maillages/classroomHeavy.obj");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		for (Maillage e : maillage){
+			e.construire();
+		}
 		
 		try{
 			nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaBase");
@@ -70,28 +65,30 @@ public class Peintre {
 	
 	public void surModificationFenêtre(int largeur, int hauteur) {
 		GL46.glViewport(0, 0, largeur, hauteur);
-		projection = Mat4.fairePerspective(0.01f, 100f, 70f, (float)largeur/(float)hauteur);
+		projection = Mat4.fairePerspective(0.01f, 100f, 50f, (float)largeur/(float)hauteur);
 	}
 	
 	public void miseÀJour() {
 		glErreur(false);
 
-		GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
-		
-		maillage.préparerAuDessin();
+		GL46.glClear(GL46.GL_COLOR_BUFFER_BIT|GL46.GL_DEPTH_BUFFER_BIT);
 
-		//transformée.tourner(new Vec3(0,0.01f,0));
-		
 		GL46.glUseProgram(nuanceur.ID);
 		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "projection"), false, projection.mat);
 		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "vue"), false, vue.avoirMat().mat);
 		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "transformee"), false, transformée.avoirMat().mat);
 		GL46.glUniform4f(GL46.glGetUniformLocation(nuanceur.ID,"coul"), 1, 0, 1, 1);
 		
-		if (maillage.estIndexé){
-			GL46.glDrawElements(GL46.GL_TRIANGLES, maillage.NSommets, GL46.GL_UNSIGNED_INT, 0);
-		}else{
-			GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, maillage.NSommets);
+		for (Maillage e : maillage){
+			e.préparerAuDessin();
+
+			//transformée.tourner(new Vec3(0,0.01f,0));
+			
+			if (e.estIndexé){
+				GL46.glDrawElements(GL46.GL_TRIANGLES, e.NSommets, GL46.GL_UNSIGNED_INT, 0);
+			}else{
+				GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, e.NSommets);
+			}
 		}
 	}
 	

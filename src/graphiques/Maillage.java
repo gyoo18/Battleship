@@ -105,10 +105,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.BYTE;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterAttributListe(short[] a, int dimension){
@@ -136,10 +139,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.SHORT;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterAttributListe(int[] a, int dimension){
@@ -167,10 +173,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.INT;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterAttributListe(long[] a, int dimension){
@@ -198,10 +207,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.LONG;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterAttributListe(float[] a, int dimension){
@@ -229,10 +241,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.FLOAT;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterAttributListe(double[] a, int dimension){
@@ -260,10 +275,13 @@ public class Maillage {
                 attributsIndexes[i] = indexe;
                 attributsTypes[i] = TypeDonnée.DOUBLE;
                 attributsDimensions[i] = dimension;
+                break;
             }
         }
 
-        NSommets = (int) a.length/dimension;
+        if (!estIndexé){
+            NSommets = (int) a.length/dimension;
+        }
     }
 
     public void ajouterIndexesListe(int[] i){

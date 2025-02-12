@@ -1,8 +1,16 @@
 package utils;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Scanner;
 
+import graphiques.Maillage;
 import graphiques.Nuanceur;
 
 public class Chargeur {
@@ -29,5 +37,330 @@ public class Chargeur {
         scanner.close();
 
         return new Nuanceur(somSource, fragSource);
+    }
+
+    public static Maillage chargerOBJ(String chemin) throws FileNotFoundException,IOException{
+        System.out.println("Chargement de "+chemin);
+        long timer = System.currentTimeMillis();
+
+        File fichier = new File(chemin);
+        Scanner scanner = new Scanner(fichier);
+
+        LinkedList<Float> posLL = new LinkedList<>();
+        LinkedList<Float> normLL = new LinkedList<>();
+        LinkedList<Float> uvLL = new LinkedList<>();
+        LinkedList<Integer> indexesCLL = new LinkedList<>();
+        LinkedList<Integer> indexesVLL = new LinkedList<>();
+
+        int curseur = 0;
+        while(scanner.hasNextLine()){
+            if (System.currentTimeMillis() - timer > 1000){
+                System.out.println("Lecture de "+chemin+" : "+curseur/1000+"Ko / "+Files.size(Paths.get(chemin))/1000+"Ko = "+(100f*(float)curseur/(float)Files.size(Paths.get(chemin)))+"%");
+                timer = System.currentTimeMillis();
+            }
+
+            String ligne = scanner.nextLine();
+            curseur += ligne.length();
+            String mots[] = ligne.split(" ");
+            switch (mots[0]) {
+                case "#":
+                    continue;
+                case "v":
+                    posLL.add(Float.parseFloat(mots[1]));
+                    posLL.add(Float.parseFloat(mots[2]));
+                    posLL.add(Float.parseFloat(mots[3]));
+                    continue;
+                case "vn":
+                    normLL.add(Float.parseFloat(mots[1]));
+                    normLL.add(Float.parseFloat(mots[2]));
+                    normLL.add(Float.parseFloat(mots[3]));
+                    continue;
+                case "vt":
+                    uvLL.add(Float.parseFloat(mots[1]));
+                    uvLL.add(Float.parseFloat(mots[2]));
+                    continue;
+                case "f":
+                    for (int i = 1; i < 4; i++){
+                        String indexes[] = mots[i].split("/");
+
+                        boolean aNorm = indexes.length > 2;
+                        boolean aUv = indexes.length > 1 && indexes[1] != "";
+
+                        int iPos = Integer.parseInt(indexes[0])-1;
+                        int iNorm = -1;
+                        int iUv = -1;
+                        if (aNorm){
+                            iNorm = Integer.parseInt(indexes[2])-1;
+                        }
+                        if (aUv){
+                            iUv = Integer.parseInt(indexes[1])-1;
+                        }
+
+                        boolean estPrésent = false;
+                        int j = 0;
+                        boolean estPos = false;
+                        boolean estNorm = false;
+                        boolean estUv = false;
+                        for (int e : indexesCLL){
+                            if (j%3==0){
+                                estPos = e==iPos;
+                            }
+                            if (j%3==1){
+                                estNorm = e==iNorm;
+                            }
+                            if (j%3==2){
+                                estUv = e==iUv;
+                                if (estPos && estNorm && estUv){
+                                    estPrésent = true;
+                                    indexesVLL.add(j/3);
+                                    break;
+                                }
+                            }
+                            j++;
+                        }
+
+                        if (!estPrésent){
+                            indexesCLL.add(iPos);
+                            indexesCLL.add(iNorm);
+                            indexesCLL.add(iUv);
+                            indexesVLL.add(indexesCLL.size()/3-1);
+                        }
+                    }
+                    continue;
+                default:
+                    continue;
+            }
+        }
+        scanner.close();
+
+        float[] pos = new float[indexesCLL.size()];
+        float[] norm = new float[indexesCLL.size()];
+        float[] uv = new float[2*indexesCLL.size()/3];
+        int[] indexes = new int[indexesVLL.size()];
+
+        int i = 0;
+        for (int e : indexesCLL){
+            if (System.currentTimeMillis() - timer > 1000){
+                System.out.println("Traitement de "+chemin+" : "+(100f*(float)i/(float)indexesCLL.size())+"%");
+                timer = System.currentTimeMillis();
+            }
+
+            if (i%3==0 && e!=-1){
+                pos[i+0] = posLL.get(e*3+0);
+                pos[i+1] = posLL.get(e*3+1);
+                pos[i+2] = posLL.get(e*3+2);
+            }
+
+            if (i%3==1 && e!=-1){
+                norm[i-1+0] = normLL.get(e*3+0);
+                norm[i-1+1] = normLL.get(e*3+1);
+                norm[i-1+2] = normLL.get(e*3+2);
+            }
+
+            if (i%3==2 && e!=-1){
+                uv[2*(i-2)/3+0] = uvLL.get(e*2+0);
+                uv[2*(i-2)/3+1] = uvLL.get(e*2+1);
+            }
+
+            i++;
+        }
+
+        i = 0;
+        for (int e : indexesVLL){
+            if (System.currentTimeMillis() - timer > 1000){
+                System.out.println("Traitement de "+chemin+" : "+(100f*(float)i/(float)indexesCLL.size())+"%");
+                timer = System.currentTimeMillis();
+            }
+
+            indexes[i] = e;
+            i++;
+        }
+
+        Maillage maillage = new Maillage(Map.of(Maillage.TypeDonnée.FLOAT, 3), true);
+        maillage.ajouterAttributListe(pos, 3);
+        maillage.ajouterAttributListe(norm, 3);
+        maillage.ajouterAttributListe(uv, 2);
+        maillage.ajouterIndexesListe(indexes);
+        return maillage;
+    }
+
+    public static Maillage[] chargerOBJSéparé(String chemin) throws FileNotFoundException,IOException{
+        System.out.println("Chargement de "+chemin);
+        long timer = System.currentTimeMillis();
+        long timerTotal = System.currentTimeMillis();
+
+        File fichier = new File(chemin);
+        Scanner scanner = new Scanner(fichier);
+
+        ArrayList<ArrayList<Float>> posLL = new ArrayList<>();
+        ArrayList<ArrayList<Float>> normLL = new ArrayList<>();
+        ArrayList<ArrayList<Float>> uvLL = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> indexesCLL = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> indexesVLL = new ArrayList<>();
+
+        int totalPos = 0;
+        int totalNorm = 0;
+        int totalUv = 0;
+
+        int iO = -1;
+        int curseur = 0;
+        while(scanner.hasNextLine()){
+            if (System.currentTimeMillis() - timer > 1000){
+                System.out.println("Lecture de "+chemin+" : "+curseur/1000+"Ko / "+Files.size(Paths.get(chemin))/1000+"Ko = "+(100f*(float)curseur/(float)Files.size(Paths.get(chemin)))+"%");
+                System.out.println("NObjets : "+posLL.size()+" Npos : "+posLL.get(iO).size()+" Nnorm : "+normLL.get(iO).size()+" Nuv : "+uvLL.get(iO).size()+" Nindexes : "+indexesVLL.get(iO).size());
+                timer = System.currentTimeMillis();
+            }
+
+            String ligne = scanner.nextLine();
+            curseur += ligne.length();
+            String mots[] = ligne.split(" ");
+            switch (mots[0]) {
+                case "#":
+                    continue;
+                case "o":
+                    posLL.add(new ArrayList<>());
+                    normLL.add(new ArrayList<>());
+                    uvLL.add(new ArrayList<>());
+                    indexesCLL.add(new ArrayList<>());
+                    indexesVLL.add(new ArrayList<>());
+                    if (iO >= 0){
+                        totalPos += posLL.get(iO).size()/3;
+                        totalNorm += normLL.get(iO).size()/3;
+                        totalUv += uvLL.get(iO).size()/2;
+                    }
+                    iO++;
+                    System.out.println("Lecture de "+mots[1]);
+                    continue;
+                case "v":
+                    posLL.get(iO).add(Float.parseFloat(mots[1]));
+                    posLL.get(iO).add(Float.parseFloat(mots[2]));
+                    posLL.get(iO).add(Float.parseFloat(mots[3]));
+                    continue;
+                case "vn":
+                    normLL.get(iO).add(Float.parseFloat(mots[1]));
+                    normLL.get(iO).add(Float.parseFloat(mots[2]));
+                    normLL.get(iO).add(Float.parseFloat(mots[3]));
+                    continue;
+                case "vt":
+                    uvLL.get(iO).add(Float.parseFloat(mots[1]));
+                    uvLL.get(iO).add(Float.parseFloat(mots[2]));
+                    continue;
+                case "f":
+                    for (int i = 1; i < 4; i++){
+                        String indexes[] = mots[i].split("/");
+
+                        boolean aNorm = indexes.length > 2;
+                        boolean aUv = indexes.length > 1 && indexes[1] != "";
+
+                        int iPos = Math.max(Integer.parseInt(indexes[0])-1-totalPos,0);
+                        int iNorm = -1;
+                        int iUv = -1;
+                        if (aNorm){
+                            iNorm = Math.max(Integer.parseInt(indexes[2])-1-totalNorm,0);
+                        }
+                        if (aUv){
+                            iUv = Math.max(Integer.parseInt(indexes[1])-1-totalUv,0);
+                        }
+
+                        boolean estPrésent = false;
+                        int j = 0;
+                        boolean estPos = false;
+                        boolean estNorm = false;
+                        boolean estUv = false;
+                        for (int e : indexesCLL.get(iO)){
+                            if (j%3==0){
+                                estPos = e==iPos;
+                            }
+                            if (j%3==1){
+                                estNorm = e==iNorm;
+                            }
+                            if (j%3==2){
+                                estUv = e==iUv;
+                                if (estPos && estNorm && estUv){
+                                    estPrésent = true;
+                                    indexesVLL.get(iO).add((j-2)/3);
+                                    break;
+                                }
+                                estPos = false;
+                                estNorm = false;
+                                estUv = false;
+                            }
+                            j++;
+                        }
+
+                        if (!estPrésent){
+                            indexesCLL.get(iO).add(iPos);
+                            indexesCLL.get(iO).add(iNorm);
+                            indexesCLL.get(iO).add(iUv);
+                            indexesVLL.get(iO).add(indexesCLL.get(iO).size()/3-1);
+                        }
+                    }
+                    continue;
+                default:
+                    continue;
+            }
+        }
+        scanner.close();
+
+        float[][] pos = new float[indexesCLL.size()][];
+        float[][] norm = new float[indexesCLL.size()][];
+        float[][] uv = new float[indexesCLL.size()][];
+        int[][] indexes = new int[indexesCLL.size()][];
+
+        for (int a = 0; a < indexesCLL.size(); a++){
+            pos[a] = new float[indexesCLL.get(a).size()];
+            norm[a] = new float[indexesCLL.get(a).size()];
+            uv[a] = new float[2*indexesCLL.get(a).size()/3];
+            indexes[a] = new int[indexesVLL.get(a).size()];
+
+            int i = 0;
+            for (int e : indexesCLL.get(a)){
+                if (System.currentTimeMillis() - timer > 1000){
+                    System.out.println("Traitement de "+chemin+" : "+(100f*(float)i/(float)indexesCLL.get(a).size())+"%");
+                    timer = System.currentTimeMillis();
+                }
+
+                if (i%3==0 && e!=-1){
+                    pos[a][i+0] = posLL.get(a).get(e*3+0);
+                    pos[a][i+1] = posLL.get(a).get(e*3+1);
+                    pos[a][i+2] = posLL.get(a).get(e*3+2);
+                }
+
+                if (i%3==1 && e!=-1){
+                    norm[a][i-1+0] = normLL.get(a).get(e*3+0);
+                    norm[a][i-1+1] = normLL.get(a).get(e*3+1);
+                    norm[a][i-1+2] = normLL.get(a).get(e*3+2);
+                }
+
+                if (i%3==2 && e!=-1){
+                    uv[a][2*(i-2)/3+0] = uvLL.get(a).get(e*2+0);
+                    uv[a][2*(i-2)/3+1] = uvLL.get(a).get(e*2+1);
+                }
+
+                i++;
+            }
+
+            i = 0;
+            for (int e : indexesVLL.get(a)){
+                if (System.currentTimeMillis() - timer > 1000){
+                    System.out.println("Traitement de "+chemin+" : "+(100f*(float)i/(float)indexesCLL.size())+"%");
+                    timer = System.currentTimeMillis();
+                }
+
+                indexes[a][i] = e;
+                i++;
+            }
+        }
+
+        Maillage[] maillage = new Maillage[indexesCLL.size()];
+        for (int i = 0; i < maillage.length; i++){
+            maillage[i] = new Maillage(Map.of(Maillage.TypeDonnée.FLOAT, 3), true);
+            maillage[i].ajouterAttributListe(pos[i], 3);
+            maillage[i].ajouterAttributListe(norm[i], 3);
+            maillage[i].ajouterAttributListe(uv[i], 2);
+            maillage[i].ajouterIndexesListe(indexes[i]);
+        }
+        System.out.println((System.currentTimeMillis()-timer)/1000+"secondes pour charger "+chemin)
+        return maillage;
     }
 }

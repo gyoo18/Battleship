@@ -20,6 +20,7 @@ public class Fenêtre {
         System.out.println("Fenêtre");
         GLFW.glfwInit();
         GLFW.glfwDefaultWindowHints();
+        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES,4);
         glfwFenêtre = GLFW.glfwCreateWindow(largeurPixels, hauteurPixels, "Battleship", 0, 0);
         if ( glfwFenêtre <= 0 ){
             throw new RuntimeException("La fenêtre GLFW n'a pas pue être créé.");

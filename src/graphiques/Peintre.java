@@ -6,7 +6,14 @@
 
 package graphiques;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL46;
@@ -26,6 +33,8 @@ public class Peintre {
 	private Mat4 projection;
 	public Transformée vue;
 	private Transformée transformée;
+
+	private Texture texture;
 	
 	public Peintre(Fenêtre fenêtre) {
 		this.fenêtre = fenêtre;
@@ -39,8 +48,7 @@ public class Peintre {
 		GL46.glEnable(GL46.GL_DEPTH_TEST);
 		
 		try{
-			Maillage m = Chargeur.chargerOBJ("assets/maillages/classroomHeavy.obj");
-			maillage = Chargeur.chargerOBJSéparé("assets/maillages/classroomHeavy.obj");
+			maillage = Chargeur.chargerOBJSéparé("assets/maillages/cube.obj");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -60,6 +68,14 @@ public class Peintre {
 		vue.mOrdre = Mat4.MOrdre.YXZ;
 		transformée = new Transformée();
 
+		File image = new File("assets/textures/0007C.png");
+		try{
+			texture = Chargeur.chargerTexture("assets/textures/0007C.png");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		texture.construire();
+
 		glErreur(true);
 	}
 	
@@ -78,6 +94,10 @@ public class Peintre {
 		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "vue"), false, vue.avoirMat().mat);
 		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "transformee"), false, transformée.avoirMat().mat);
 		GL46.glUniform4f(GL46.glGetUniformLocation(nuanceur.ID,"coul"), 1, 0, 1, 1);
+		GL46.glUniform1i(GL46.glGetUniformLocation(nuanceur.ID,"tex"),0);
+
+		GL46.glActiveTexture(GL46.GL_TEXTURE0);
+		GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture.ID);
 		
 		for (Maillage e : maillage){
 			e.préparerAuDessin();

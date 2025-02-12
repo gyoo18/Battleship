@@ -1,3 +1,5 @@
+//cspell:ignore mediump
+//cspell:ignore transformee
 #version 460 core
 precision mediump float;
 
@@ -9,9 +11,11 @@ uniform mat4 projection;
 uniform mat4 vue;
 uniform mat4 transformee;
 
-out vec3 col;
+out vec2 uv_O;
+out vec3 norm_O;
 
 void main(){
-    col = vec3(uv,norm.z);
+    uv_O = uv;
+    norm_O = norm;
     gl_Position = projection*vue*transformee*vec4(pos,1.0);
 }

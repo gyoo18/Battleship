@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL46;
 import graphiques.Maillage;
 import graphiques.Nuanceur;
 import graphiques.Texture;
+import maths.Vec3;
 
 public class Chargeur {
     
@@ -53,11 +54,12 @@ public class Chargeur {
         File fichier = new File(chemin);
         Scanner scanner = new Scanner(fichier);
 
-        LinkedList<Float> posLL = new LinkedList<>();
-        LinkedList<Float> normLL = new LinkedList<>();
-        LinkedList<Float> uvLL = new LinkedList<>();
-        LinkedList<Integer> indexesCLL = new LinkedList<>();
-        LinkedList<Integer> indexesVLL = new LinkedList<>();
+        ArrayList<Float> posLL = new ArrayList<>();
+        ArrayList<Float> normLL = new ArrayList<>();
+        ArrayList<Float> uvLL = new ArrayList<>();
+        ArrayList<Integer> indexesCLL = new ArrayList<>();
+        ArrayList<Integer> indexesVLL = new ArrayList<>();
+        Octarbre<int[]> attributsArbre = null;
 
         int curseur = 0;
         while(scanner.hasNextLine()){
@@ -70,6 +72,9 @@ public class Chargeur {
             curseur += ligne.length();
             String mots[] = ligne.split(" ");
             switch (mots[0]) {
+                case "o":
+                    attributsArbre = null;
+                    continue;
                 case "#":
                     continue;
                 case "v":
@@ -87,6 +92,23 @@ public class Chargeur {
                     uvLL.add(Float.parseFloat(mots[2]));
                     continue;
                 case "f":
+                    if (attributsArbre == null){
+                        Vec3 max = new Vec3(0);
+                        int i = 0;
+                        for (float e : posLL){
+                            if(i%3==0 && Math.abs(e) > max.x){
+                                max.x = Math.abs(e);
+                            }
+                            if(i%3==1 && Math.abs(e) > max.y){
+                                max.y = Math.abs(e);
+                            }
+                            if(i%3==2 && Math.abs(e) > max.z){
+                                max.z = Math.abs(e);
+                            }
+                            i++;
+                        }
+                        attributsArbre = new Octarbre<>(max.mult(2.1f), 100);
+                    }
                     for (int i = 1; i < 4; i++){
                         String indexes[] = mots[i].split("/");
 
@@ -103,29 +125,16 @@ public class Chargeur {
                             iUv = Integer.parseInt(indexes[1])-1;
                         }
 
+                        int[] objet = new int[]{iPos,iNorm,iUv,indexesCLL.size()/3};
+                        Vec3 pos = new Vec3(posLL.get(iPos*3+0),posLL.get(iPos*3+1),posLL.get(iPos*3+2));
+                        ArrayList<int[]> liste = attributsArbre.obtenirListeÀPosition(pos);
+
                         boolean estPrésent = false;
-                        int j = 0;
-                        boolean estPos = false;
-                        boolean estNorm = false;
-                        boolean estUv = false;
-                        f : for (int e : indexesCLL){
-                            s : switch (j%3){
-                                case 0:
-                                    estPos = e==iPos;
-                                    break s;
-                                case 1:
-                                    estNorm = e==iNorm;
-                                    break s;
-                                case 2:
-                                    estUv = e==iUv;
-                                    if (estPos && estNorm && estUv){
-                                        estPrésent = true;
-                                        indexesVLL.add(j/3);
-                                        break f;
-                                    }
-                                    break s;
+                        for (int[] e : liste){
+                            if (e != null && objet[0] == e[0] && objet[1] == e[1] && objet[2] == e[2]){
+                                indexesVLL.add(e[3]);
+                                estPrésent = true;
                             }
-                            j++;
                         }
 
                         if (!estPrésent){
@@ -133,6 +142,7 @@ public class Chargeur {
                             indexesCLL.add(iNorm);
                             indexesCLL.add(iUv);
                             indexesVLL.add(indexesCLL.size()/3-1);
+                            attributsArbre.ajouter(objet, pos);
                         }
                     }
                     continue;

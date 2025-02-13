@@ -58,11 +58,17 @@ public class Mat4{
     public static Mat4 fairePerspective(float plan_proche, float plan_loin, float FOV, float ratio) {
         float n = plan_proche;
         float f = plan_loin;
+        // return new Mat4(new float[] {
+        //     1f, 0f,   0f,             0f,
+        //     0f, 1f*ratio, 0f,             0f,
+        //     0f, 0f,   2f/(f-n),       (float)Math.tan( (double)FOV*Math.PI/180.0 ),
+        //     0f, 0f,  -2f*n/(f-n)-1f, 0f
+        // });
         return new Mat4(new float[] {
-            1f, 0f,   0f,             0f,
-            0f, ratio, 0f,             0f,
-            0f, 0f,   2f/(f-n),       (float)Math.tan( (double)FOV*Math.PI/180d ),
-            0f, 0f,  -2f*n/(f-n)-1f, 1f
+            1f/(float)Math.tan( (double)FOV*Math.PI/180.0 ), 0f,   0f,             0f,
+            0f, 1f/(float)Math.tan( (double)FOV*Math.PI/180.0 )*ratio, 0f,             0f,
+            0f, 0f,   (f+n)/(n-f),       -1f,
+            0f, 0f,  2*f*n/(n-f), 0f
         });
     }
     

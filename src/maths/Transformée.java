@@ -6,6 +6,7 @@ public class Transformée {
     
     public MOrdre mOrdre = MOrdre.XYZ;
     public boolean estOrbite = false;
+    public boolean estVue = false;
 
     private Vec3 pos;
     private Vec3 rot;
@@ -111,10 +112,19 @@ public class Transformée {
 
     public Mat4 avoirMat(){
         if (estModifié){
-            if (estOrbite){
+            if (estVue && !estOrbite){
+                mat = new Mat4();
+                mat.mulM(posMat);
+                mat.mulM(rotMat);
+                mat.mulM(échMat);
+            }else if (estVue && estOrbite){
                 mat = new Mat4().mulM(rotMat).mulM(posMat).mulM(échMat);
             }else{
-                mat = new Mat4().mulM(posMat).mulM(rotMat).mulM(échMat);
+                // mat = pos*rot*éch*x
+                mat = new Mat4();
+                mat.mulM(posMat);
+                mat.mulM(rotMat);
+                mat.mulM(échMat);
             }
         }
         return mat;

@@ -55,10 +55,10 @@ public class Fenêtre {
                     peintre.vue.translation(new Vec3(0.1f*(float)Math.cos(rot.y),0,0.1f*(float)Math.sin(rot.y)).opposé());
                     break;
                 case GLFW.GLFW_KEY_W:
-                    peintre.vue.translation(new Vec3(-0.1f*(float)Math.sin(rot.y),0,0.1f*(float)Math.cos(rot.y)).opposé());
+                    peintre.vue.translation(new Vec3(0.1f*(float)Math.sin(rot.y),0,-0.1f*(float)Math.cos(rot.y)).opposé());
                     break;
                 case GLFW.GLFW_KEY_S:
-                    peintre.vue.translation(new Vec3(0.1f*(float)Math.sin(rot.y),0,-0.1f*(float)Math.cos(rot.y)).opposé());
+                    peintre.vue.translation(new Vec3(-0.1f*(float)Math.sin(rot.y),0,0.1f*(float)Math.cos(rot.y)).opposé());
                     break;
                 case GLFW.GLFW_KEY_SPACE:
                     peintre.vue.translation(new Vec3(0,0.1f,0).opposé());
@@ -75,7 +75,7 @@ public class Fenêtre {
     private GLFWCursorPosCallback surCurseurBouge = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long fenêtre, double xpos, double ypos) {
-            peintre.vue.faireRotation(new Vec3(2f*(float)Math.PI*((float)ypos/(float)hauteurPixels-0.5f), -2f*(float)Math.PI*((float)xpos/(float)largeurPixels-0.5f), 0));
+            peintre.vue.faireRotation(new Vec3(2f*(float)Math.PI*((float)ypos/(float)hauteurPixels-0.5f), -2f*(float)Math.PI*((float)xpos/(float)largeurPixels-0.5f), 0).opposé());
         }
     };
 

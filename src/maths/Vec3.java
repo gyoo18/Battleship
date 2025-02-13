@@ -43,56 +43,61 @@ public class Vec3 {
      * Additionne b à ce vecteur (a+b)
      * @param b - Vecteur à additionner
      */
-    public void addi(Vec3 b){
+    public Vec3 addi(Vec3 b){
         x += b.x;
         y += b.y;
         z += b.z;
+        return this;
     }
 
     /**
      * Soustrait b à ce vecteur (a-b)
      * @param b - Vecteur à soustraire
      */
-    public void sous(Vec3 b){
+    public Vec3 sous(Vec3 b){
         x -= b.x;
         y -= b.y;
         z -= b.z;
+        return this;
     }
 
     /**
      * Multiplie ce vecteur par le scalaire s (a*s)
      * @param s - Facteur multiplicateur
      */
-    public void mult(float s){
+    public Vec3 mult(float s){
         x *= s;
         y *= s;
         z *= s;
+        return this;   
     }
 
     /**
      * Multiplie les composantes de ce vecteur par les composantes de m (a.x*m.x; a.y*m.y)
      * @param m - Vecteur multiplicateur
      */
-    public void mult(Vec3 m){
+    public Vec3 mult(Vec3 m){
         x *= m.x;
         y *= m.y;
         z *= m.z;
+        return this;
     }
 
     /**
      * Divise les composantes de ce vecteur par les composantes de d (a.x/d.x; a.y/d.y)
      * @param d
      */
-    public void div(Vec3 d){
+    public Vec3 div(Vec3 d){
         x = x/d.x;
         y = y/d.y;
         z = z/d.z;
+        return this;
     }
 
     /**
      * Normalise ce vecteur
      */
-    public void norm(){
+    public Vec3 norm(){
         if(longueur() > 0){
             x = x/ longueur();
             y = y/ longueur();
@@ -100,6 +105,7 @@ public class Vec3 {
         }else{
             System.err.println("Normalisation de vecteur nul. Les composantes resteront 0");
         }
+        return this;
     }
 
 

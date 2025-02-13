@@ -50,7 +50,7 @@ public class Peintre {
 		
 		try{
 			//maillages = Chargeur.chargerOBJSéparé("assets/maillages/Stan_dragon.obj");
-			maillage = Chargeur.chargerOBJ("assets/maillages/Stan_dragon.obj");
+			maillage = Chargeur.chargerOBJ("assets/maillages/VillageDemo.obj");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -64,10 +64,11 @@ public class Peintre {
 		}
 		nuanceur.construire();
 
-		projection = Mat4.fairePerspective(0.01f, 100f, 70f, (float)fenêtre.largeurPixels/(float)fenêtre.hauteurPixels);
-		vue = new Transformée(new Vec3(0.5f,1f,-2f).opposé(), new Vec3(-0.1f,-0.1f,0).opposé(), new Vec3(1));
-		vue.mOrdre = Mat4.MOrdre.YXZ;
-		transformée = new Transformée().échelonner(new Vec3(10f));
+		projection = Mat4.fairePerspective(0.01f, 100f, 50f, (float)fenêtre.largeurPixels/(float)fenêtre.hauteurPixels);
+		vue = new Transformée();
+		vue.mOrdre = Mat4.MOrdre.XYZ;
+		vue.estVue = true;
+		transformée = new Transformée();
 
 		try{
 			texture = Chargeur.chargerTexture("assets/textures/Village_Demo.png");
@@ -98,6 +99,7 @@ public class Peintre {
 
 		GL46.glActiveTexture(GL46.GL_TEXTURE0);
 		GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture.ID);
+		//vue.tourner(new Vec3(0,0.01f,0));
 		
 		//for (Maillage e : maillage){
 			maillage.préparerAuDessin();

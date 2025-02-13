@@ -17,5 +17,5 @@ out vec3 norm_O;
 void main(){
     uv_O = uv;
     norm_O = norm;
-    gl_Position = projection*vue*transformee*vec4(pos,1.0);
+    gl_Position = projection*vue*vec4(pos*0.03,1.0);
 }

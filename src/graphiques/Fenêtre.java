@@ -5,7 +5,10 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
+import jeu.Caméra;
+import jeu.Scène;
 import maths.Vec3;
+import utils.Ressources;
 
 public class Fenêtre {
 
@@ -16,6 +19,8 @@ public class Fenêtre {
     public int largeurPixels = 800;
     public int hauteurPixels = 800;
 
+    private Scène scène;
+
     public Fenêtre(){
         System.out.println("Fenêtre");
         GLFW.glfwInit();
@@ -25,13 +30,20 @@ public class Fenêtre {
         if ( glfwFenêtre <= 0 ){
             throw new RuntimeException("La fenêtre GLFW n'a pas pue être créé.");
         }
+        Ressources.surFenêtreModifiée(largeurPixels, hauteurPixels);
         GLFW.glfwMakeContextCurrent(glfwFenêtre);
         GLFW.glfwSetFramebufferSizeCallback(glfwFenêtre, surFenêtreModifiée);
         GLFW.glfwSetKeyCallback(glfwFenêtre,surToucheClavier);
         GLFW.glfwSetCursorPosCallback(glfwFenêtre, surCurseurBouge);
         GLFW.glfwShowWindow(glfwFenêtre);
+    }
 
-        peintre = new Peintre(this);
+    public void lierPeintre(Peintre peintre) {
+        this.peintre = peintre;
+    }
+
+    public void lierScène(Scène scène){
+        this.scène = scène;
     }
 
     private GLFWFramebufferSizeCallback surFenêtreModifiée = new GLFWFramebufferSizeCallback() {
@@ -39,33 +51,36 @@ public class Fenêtre {
         public void invoke(long fenêtre, int largeur, int hauteur){
             largeurPixels = largeur;
             hauteurPixels = hauteur;
+            Ressources.surFenêtreModifiée(largeur, hauteur);
             peintre.surModificationFenêtre(largeur, hauteur);
+            scène.surModificationFenêtre();
         }
     };
 
     private GLFWKeyCallback surToucheClavier = new GLFWKeyCallback() {
         @Override
         public void invoke(long fenêtre, int touche, int codescan, int action, int mods) {
-            Vec3 rot = peintre.vue.avoirRot();
+            Caméra caméra = scène.caméra;
+            Vec3 rot = caméra.avoirRot();
             switch (touche) {
                 case GLFW.GLFW_KEY_A:
-                    peintre.vue.translation(new Vec3(-0.1f*(float)Math.cos(rot.y),0,-0.1f*(float)Math.sin(rot.y)).opposé());
+                    caméra.translation(new Vec3(-0.1f*(float)Math.cos(rot.y),0,-0.1f*(float)Math.sin(rot.y)));
                     break;
                 case GLFW.GLFW_KEY_D:
-                    peintre.vue.translation(new Vec3(0.1f*(float)Math.cos(rot.y),0,0.1f*(float)Math.sin(rot.y)).opposé());
+                    caméra.translation(new Vec3(0.1f*(float)Math.cos(rot.y),0,0.1f*(float)Math.sin(rot.y)));
                     break;
                 case GLFW.GLFW_KEY_W:
-                    peintre.vue.translation(new Vec3(0.1f*(float)Math.sin(rot.y),0,-0.1f*(float)Math.cos(rot.y)).opposé());
+                    caméra.translation(new Vec3(0.1f*(float)Math.sin(rot.y),0,-0.1f*(float)Math.cos(rot.y)));
                     break;
                 case GLFW.GLFW_KEY_S:
-                    peintre.vue.translation(new Vec3(-0.1f*(float)Math.sin(rot.y),0,0.1f*(float)Math.cos(rot.y)).opposé());
+                    caméra.translation(new Vec3(-0.1f*(float)Math.sin(rot.y),0,0.1f*(float)Math.cos(rot.y)));
                     break;
                 case GLFW.GLFW_KEY_SPACE:
-                    peintre.vue.translation(new Vec3(0,0.1f,0).opposé());
+                    caméra.translation(new Vec3(0,0.1f,0));
                     break;
                 case GLFW.GLFW_KEY_LEFT_SHIFT:
                 case GLFW.GLFW_KEY_RIGHT_SHIFT:
-                    peintre.vue.translation(new Vec3(0,-0.1f,0).opposé());
+                    caméra.translation(new Vec3(0,-0.1f,0));
                     break;
             }
         }
@@ -75,7 +90,7 @@ public class Fenêtre {
     private GLFWCursorPosCallback surCurseurBouge = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long fenêtre, double xpos, double ypos) {
-            peintre.vue.faireRotation(new Vec3(2f*(float)Math.PI*((float)ypos/(float)hauteurPixels-0.5f), -2f*(float)Math.PI*((float)xpos/(float)largeurPixels-0.5f), 0).opposé());
+            scène.caméra.faireRotation(new Vec3(2f*(float)Math.PI*((float)ypos/(float)hauteurPixels-0.5f), -2f*(float)Math.PI*((float)xpos/(float)largeurPixels-0.5f), 0));
         }
     };
 
@@ -84,7 +99,7 @@ public class Fenêtre {
             actif = false;
         }
         
-        peintre.miseÀJour();
+        peintre.mettreÀJour();
 
         GLFW.glfwSwapBuffers(glfwFenêtre);
         GLFW.glfwPollEvents();

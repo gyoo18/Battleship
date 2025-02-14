@@ -275,4 +275,12 @@ public class Vec3 {
         return new Vec3(-x,-y,-z);
     }
 
+    /**
+     * Retourne le vecteur inverse de ce vecteur
+     * @return 1/a
+     */
+    public Vec3 inv(){
+        return new Vec3(1f/x,1f/y,1f/z);
+    }
+
 }

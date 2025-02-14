@@ -6,112 +6,91 @@
 
 package graphiques;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Map;
 
-import javax.imageio.ImageIO;
+import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL46;
 
+import jeu.Objet;
+import jeu.Scène;
 import maths.*;
-import maths.Mat4.MOrdre;
-
-import utils.Chargeur;
 
 public class Peintre {
 	
 	private Fenêtre fenêtre;
 
-	private Nuanceur nuanceur;
-	private Maillage[] maillages;
-	private Maillage maillage;
-
-	private Mat4 projection;
-	public Transformée vue;
-	private Transformée transformée;
-
-	private Texture texture;
+	private Scène scène;
 	
-	public Peintre(Fenêtre fenêtre) {
-		this.fenêtre = fenêtre;
+	public Peintre() {
 		System.out.println("Peintre");
 		
 		GL.createCapabilities();
 		
-		GL46.glViewport(0, 0, fenêtre.largeurPixels, fenêtre.hauteurPixels);
 		GL46.glClearColor(0.25f, 0.5f, 0.8f, 1f);
 
 		GL46.glEnable(GL46.GL_DEPTH_TEST);
-		
-		try{
-			//maillages = Chargeur.chargerOBJSéparé("assets/maillages/Stan_dragon.obj");
-			maillage = Chargeur.chargerOBJ("assets/maillages/VillageDemo.obj");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		//maillage = Maillage.fusionner(maillages);
-		maillage.construire();
-		
-		try{
-			nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaBase");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		nuanceur.construire();
-
-		projection = Mat4.fairePerspective(0.01f, 100f, 50f, (float)fenêtre.largeurPixels/(float)fenêtre.hauteurPixels);
-		vue = new Transformée();
-		vue.mOrdre = Mat4.MOrdre.XYZ;
-		vue.estVue = true;
-		transformée = new Transformée();
-
-		try{
-			texture = Chargeur.chargerTexture("assets/textures/Village_Demo.png");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		texture.construire();
 
 		glErreur(true);
+	}
+
+	public void lierFenêtre(Fenêtre fenêtre){
+		this.fenêtre = fenêtre;
+		GL46.glViewport(0, 0, fenêtre.largeurPixels, fenêtre.hauteurPixels);
+	}
+
+	public void lierScène(Scène scène){
+		if (!scène.estConstruite){
+			scène.construireScène();
+			glErreur(true);
+		}
+		this.scène = scène;
 	}
 	
 	public void surModificationFenêtre(int largeur, int hauteur) {
 		GL46.glViewport(0, 0, largeur, hauteur);
-		projection = Mat4.fairePerspective(0.01f, 100f, 50f, (float)largeur/(float)hauteur);
 	}
 	
-	public void miseÀJour() {
-		glErreur(false);
-
+	public void mettreÀJour() {
 		GL46.glClear(GL46.GL_COLOR_BUFFER_BIT|GL46.GL_DEPTH_BUFFER_BIT);
 
-		GL46.glUseProgram(nuanceur.ID);
-		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "projection"), false, projection.mat);
-		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "vue"), false, vue.avoirMat().mat);
-		GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(nuanceur.ID, "transformee"), false, transformée.avoirMat().mat);
-		GL46.glUniform4f(GL46.glGetUniformLocation(nuanceur.ID,"coul"), 1, 0, 1, 1);
-		GL46.glUniform1i(GL46.glGetUniformLocation(nuanceur.ID,"tex"),0);
+		if (scène.estConstruite){
+			ArrayList<Objet> objets = scène.objets;
+			for (Objet o : objets){
+				if (o.aMaillage() && o.aNuanceur()){
+					o.avoirMaillage().préparerAuDessin();
+					GL46.glUseProgram(o.avoirNuanceur().ID);
 
-		GL46.glActiveTexture(GL46.GL_TEXTURE0);
-		GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture.ID);
-		//vue.tourner(new Vec3(0,0.01f,0));
-		
-		//for (Maillage e : maillage){
-			maillage.préparerAuDessin();
+					if (o.aTexture()){
+						GL46.glActiveTexture(GL46.GL_TEXTURE0);
+						GL46.glBindTexture(GL46.GL_TEXTURE_2D, o.avoirTexture().ID);
+						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"Tex"),0);
+					}
 
-			//transformée.tourner(new Vec3(0,0.01f,0));
-			
-			if (maillage.estIndexé){
-				GL46.glDrawElements(GL46.GL_TRIANGLES, maillage.NSommets, GL46.GL_UNSIGNED_INT, 0);
-			}else{
-				GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, maillage.NSommets);
+					if (o.aCouleur()){
+						Vec4 coul = o.avoirCouleur();
+						GL46.glUniform4f(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"Coul"),coul.x,coul.y,coul.z,coul.w);
+					}
+
+					if (o.aTransformée()){
+						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"transforme"),false,o.avoirTransformée().avoirMat().mat);
+					}else{
+						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"transforme"),false, new Mat4().mat);
+					}
+
+					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"vue"),false,scène.caméra.avoirVue().avoirMat().mat);
+					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"projection"),false,scène.caméra.projection.mat);
+
+					if (o.avoirMaillage().estIndexé){
+						GL46.glDrawElements(GL46.GL_TRIANGLES, o.avoirMaillage().NSommets, GL46.GL_UNSIGNED_INT,0);
+					}else {
+						GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, o.avoirMaillage().NSommets);
+					}
+				}
 			}
-		//}
+		}
+
+		glErreur(false);
 	}
 	
 	public void détruire() {

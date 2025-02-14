@@ -386,72 +386,72 @@ public class Chargeur {
 
     public static Texture chargerTexture(String chemin) throws FileNotFoundException, IOException{
         BufferedImage bi = ImageIO.read(new File(chemin));
-			int l = bi.getWidth();
-			int h = bi.getHeight();
-			int type = bi.getType();
-			int format;
-			int internalFormat;
-			int dataType;
-			switch (type){
-				case BufferedImage.TYPE_INT_RGB:
-				case BufferedImage.TYPE_INT_ARGB:
-				case BufferedImage.TYPE_INT_ARGB_PRE:
-					format = GL46.GL_RGBA;
-					internalFormat = GL46.GL_RGBA;
-					dataType = GL46.GL_UNSIGNED_BYTE;
-					break;
-				case BufferedImage.TYPE_INT_BGR:
-					format = GL46.GL_BGRA;
-					internalFormat = GL46.GL_RGBA;
-					dataType = GL46.GL_UNSIGNED_BYTE;
-					break;
-				case BufferedImage.TYPE_3BYTE_BGR:
-					format = GL46.GL_BGR;
-					internalFormat = GL46.GL_RGB;
-					dataType = GL46.GL_UNSIGNED_BYTE;
-					break;
-				case BufferedImage.TYPE_4BYTE_ABGR:
-				case BufferedImage.TYPE_4BYTE_ABGR_PRE:
-					format = GL46.GL_BGRA;
-					internalFormat = GL46.GL_RGBA;
-					dataType = GL46.GL_UNSIGNED_BYTE;
-					break;
-				case BufferedImage.TYPE_BYTE_GRAY:
-				case BufferedImage.TYPE_BYTE_BINARY:
-				case BufferedImage.TYPE_BYTE_INDEXED:
-					format = GL46.GL_RED;
-					internalFormat = GL46.GL_RED;
-					dataType = GL46.GL_UNSIGNED_BYTE;
-					break;
-				case BufferedImage.TYPE_USHORT_GRAY:
-					format = GL46.GL_RED;
-					internalFormat = GL46.GL_RED;
-					dataType = GL46.GL_UNSIGNED_SHORT;
-					break;
-				case BufferedImage.TYPE_USHORT_565_RGB:
-					format = GL46.GL_RGB;
-					internalFormat = GL46.GL_RGB;
-					dataType = GL46.GL_UNSIGNED_SHORT_5_6_5;
-					break;
-				case BufferedImage.TYPE_USHORT_555_RGB:
-					format = GL46.GL_RGB;
-					internalFormat = GL46.GL_RGB5;
-					dataType = GL46.GL_UNSIGNED_SHORT;
-					break;
-				default:
-					format = GL46.GL_RGBA;
-					internalFormat = GL46.GL_RGBA;
-					dataType = GL46.GL_BYTE;
-					break;
-			}
-			byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-            Texture texture = new Texture(data, l, h);
-            texture.format = format;
-            texture.internalFormat = internalFormat;
-            texture.dataType = dataType;
-            if (internalFormat == GL46.GL_RGBA){
-                texture.inverserAlpha = true;
-            }
-            return texture;
+        int l = bi.getWidth();
+        int h = bi.getHeight();
+        int type = bi.getType();
+        int format;
+        int internalFormat;
+        int dataType;
+        switch (type){
+            case BufferedImage.TYPE_INT_RGB:
+            case BufferedImage.TYPE_INT_ARGB:
+            case BufferedImage.TYPE_INT_ARGB_PRE:
+                format = GL46.GL_RGBA;
+                internalFormat = GL46.GL_RGBA;
+                dataType = GL46.GL_UNSIGNED_BYTE;
+                break;
+            case BufferedImage.TYPE_INT_BGR:
+                format = GL46.GL_BGRA;
+                internalFormat = GL46.GL_RGBA;
+                dataType = GL46.GL_UNSIGNED_BYTE;
+                break;
+            case BufferedImage.TYPE_3BYTE_BGR:
+                format = GL46.GL_BGR;
+                internalFormat = GL46.GL_RGB;
+                dataType = GL46.GL_UNSIGNED_BYTE;
+                break;
+            case BufferedImage.TYPE_4BYTE_ABGR:
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
+                format = GL46.GL_BGRA;
+                internalFormat = GL46.GL_RGBA;
+                dataType = GL46.GL_UNSIGNED_BYTE;
+                break;
+            case BufferedImage.TYPE_BYTE_GRAY:
+            case BufferedImage.TYPE_BYTE_BINARY:
+            case BufferedImage.TYPE_BYTE_INDEXED:
+                format = GL46.GL_RED;
+                internalFormat = GL46.GL_RED;
+                dataType = GL46.GL_UNSIGNED_BYTE;
+                break;
+            case BufferedImage.TYPE_USHORT_GRAY:
+                format = GL46.GL_RED;
+                internalFormat = GL46.GL_RED;
+                dataType = GL46.GL_UNSIGNED_SHORT;
+                break;
+            case BufferedImage.TYPE_USHORT_565_RGB:
+                format = GL46.GL_RGB;
+                internalFormat = GL46.GL_RGB;
+                dataType = GL46.GL_UNSIGNED_SHORT_5_6_5;
+                break;
+            case BufferedImage.TYPE_USHORT_555_RGB:
+                format = GL46.GL_RGB;
+                internalFormat = GL46.GL_RGB5;
+                dataType = GL46.GL_UNSIGNED_SHORT;
+                break;
+            default:
+                format = GL46.GL_RGBA;
+                internalFormat = GL46.GL_RGBA;
+                dataType = GL46.GL_BYTE;
+                break;
+        }
+        byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
+        Texture texture = new Texture(data, l, h);
+        texture.format = format;
+        texture.internalFormat = internalFormat;
+        texture.dataType = dataType;
+        if (internalFormat == GL46.GL_RGBA){
+            texture.inverserAlpha = true;
+        }
+        return texture;
     }
 }

@@ -13,9 +13,12 @@ uniform mat4 transforme;
 
 out vec2 uv_O;
 out vec3 norm_O;
+out float z;
 
 void main(){
     uv_O = uv;
     norm_O = norm;
-    gl_Position = projection*vue*transforme*vec4(pos*0.03,1.0);
+    vec4 posFin = projection*vue*transforme*vec4(pos,1.0);
+    gl_Position = projection*vue*transforme*vec4(pos,1.0);
+    z = posFin.z;
 }

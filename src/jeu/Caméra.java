@@ -48,6 +48,7 @@ public class Caméra {
 
     public void surFenêtreModifiée(){
         this.ratio = Ressources.ratioFenêtre;
+        projection = Mat4.fairePerspective(planProche, planLoin, FOV, ratio);
     }
 
     public void positionner   (Vec3 pos) { vue.positionner  ( pos.opposé() ); }

@@ -23,12 +23,12 @@ public class App {
         Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaTexturé");
         Texture texture = Chargeur.chargerTexture("assets/textures/Porte-Avion.png");
         Transformée transformée = new Transformée();
-        Maillage grille = GénérateurMaillage.générerGrille(11, 11);
-        Nuanceur nuanceur2 = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaColoré");
+        Maillage grille = GénérateurMaillage.générerGrille(51, 51);
+        Nuanceur nuanceur2 = Chargeur.chargerNuanceurFichier("assets/nuanceurs/eau");
         Transformée tGrille = new Transformée().faireÉchelle(new Vec3(60*10)).positionner(new Vec3(-30*10,0,-30*10));
         Maillage mCube = Chargeur.chargerOBJ("assets/maillages/cube.obj");
         Objet objet = new Objet("Porte-Avion", maillage, nuanceur, null, texture, transformée);
-        Objet eau = new Objet("Eau", grille, nuanceur2, new Vec4(98f/255f, 214f/255f, 240f/255f,1f),null,tGrille);
+        Objet eau = new Objet("Eau", grille, nuanceur2, new Vec4(9f/255f, 16f/255f, 65f/255f,1f),null,tGrille);
         Objet pointeur = new Objet("pointeur", mCube, nuanceur2, new Vec4(1f,1f,1f,1f), null, new Transformée().échelonner(new Vec3(10)));
         Scène scène = new Scène();
         scène.ajouterObjet(objet);

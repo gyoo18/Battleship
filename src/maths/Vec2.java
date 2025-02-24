@@ -49,27 +49,30 @@ public class Vec2 {
      * Additionne b à ce vecteur (a+b)
      * @param b - Vecteur à additionner
      */
-    public void addi(Vec2 b){
+    public Vec2 addi(Vec2 b){
         x += b.x;
         y += b.y;
+        return this;
     }
 
     /**
      * Soustrait b de ce vecteur (a-b)
      * @param b - Vecteur à soustraire
      */
-    public void sous(Vec2 b){
+    public Vec2 sous(Vec2 b){
         x -= b.x;
         y -= b.y;
+        return this;
     }
 
     /**
      * Multiplie ce vecteur par un scalaire (a*s)
      * @param s - Facteur multiplicateur
      */
-    public void mult(float s){
+    public Vec2 mult(float s){
         x *= s;
         y *= s;
+        return this;
     }
 
     /**
@@ -77,9 +80,10 @@ public class Vec2 {
      * les composantes de m (a = (a.x*b.x; a.y*b.y))
      * @param m - Vecteur multiplicateur
      */
-    public void mult(Vec2 m){
+    public Vec2 mult(Vec2 m){
         x *= m.x;
         y *= m.y;
+        return this;
     }
 
     /**
@@ -87,18 +91,20 @@ public class Vec2 {
      * les composantes de d (a = (a.x/d.x; a.y/d.y))
      * @param d
      */
-    public void div(Vec2 d){
+    public Vec2 div(Vec2 d){
         x = x/d.x;
         y = y/d.y;
+        return this;
     }
 
     /**
      * Normalise ce vecteur
      */
-    public void norm(){
+    public Vec2 norm(){
         float l = longueur();
         x = x/l;
         y = y/l;
+        return this;
     }
 
     /**

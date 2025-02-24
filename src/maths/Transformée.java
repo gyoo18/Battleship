@@ -10,6 +10,7 @@ public class Transformée {
     private Vec3 pos;
     private Vec3 rot;
     private Vec3 éch;
+    public float rayon = 0f;
 
     private Mat4 posMat;
     private Mat4 rotMat;
@@ -55,17 +56,12 @@ public class Transformée {
         mat = new Mat4(t.mat);
     }
     
-    public Vec3 avoirPos(){
-        return pos;
-    }
-
-    public Vec3 avoirRot(){
-        return rot;
-    }
-
-    public Vec3 avoirÉch(){
-        return éch;
-    }
+    public Vec3 avoirPos(){return pos;}
+    public Vec3 avoirRot(){return rot;}
+    public Vec3 avoirÉch(){return éch;}
+    public Mat4 avoirPosMat(){return posMat;}
+    public Mat4 avoirRotMat(){return rotMat;}
+    public Mat4 avoirÉchMat(){return échMat;}
 
     public Transformée positionner(Vec3 p){
         pos = p.copier();
@@ -112,13 +108,13 @@ public class Transformée {
     public Mat4 avoirMat(){
         if (estModifié){
             if (estOrbite){
-                mat = new Mat4().mulM(rotMat).mulM(posMat).mulM(échMat);
+                mat = new Mat4().mulM(posMat).mulM(rotMat).mulM(new Mat4().positionner(new Vec3(0,0,rayon))).mulM(échMat);
             }else{
                 // mat = pos*rot*éch*x
                 mat = new Mat4();
+                mat.mulM(échMat);
                 mat.mulM(posMat);
                 mat.mulM(rotMat);
-                mat.mulM(échMat);
             }
         }
         return mat;

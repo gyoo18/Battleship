@@ -98,10 +98,11 @@ public class Vec3 {
      * Normalise ce vecteur
      */
     public Vec3 norm(){
-        if(longueur() > 0){
-            x = x/ longueur();
-            y = y/ longueur();
-            z = z/ longueur();
+        float l = longueur();
+        if(l > 0){
+            x = x/ l;
+            y = y/ l;
+            z = z/ l;
         }else{
             System.err.println("Normalisation de vecteur nul. Les composantes resteront 0");
         }

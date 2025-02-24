@@ -74,8 +74,10 @@ public class Peintre {
 
 					if (o.aTransformée()){
 						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"transforme"),false,o.avoirTransformée().avoirMat().mat);
+						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"rotation"),false,o.avoirTransformée().avoirRotMat().mat);
 					}else{
 						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"transforme"),false, new Mat4().mat);
+						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"rotation"),false, new Mat4().mat);
 					}
 
 					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"vue"),false,scène.caméra.avoirVue().avoirMat().mat);

@@ -40,10 +40,10 @@ public class Mat4{
     public Mat4 mulM(Mat4 a) {
         float[] matV = new float[16];
         for ( int i = 0; i < matV.length; i++ ) {
-            int ax = 0;
+            // int ax = 0;
             int ay = (int)(i/4f);
             int bx = Math.floorMod(i, 4);
-            int by = 0;
+            // int by = 0;
             int cx = bx;
             int cy = ay;
             matV[cx + 4*cy] = (   this.mat[0 + ay*4]*a.mat[bx + 0*4]
@@ -53,6 +53,39 @@ public class Mat4{
         }
         this.mat = matV;
         return this;
+    }
+
+    public Vec3 mulV(Vec3 b){
+        return new Vec3(
+            b.x*mat[4*0+0]+b.y*mat[4*1+0]+b.z*mat[4*2+0]+mat[4*3+0],
+            b.x*mat[4*0+1]+b.y*mat[4*1+1]+b.z*mat[4*2+1]+mat[4*3+1],
+            b.x*mat[4*0+2]+b.y*mat[4*1+2]+b.z*mat[4*2+2]+mat[4*3+2]
+        );
+    }
+
+    public static Mat4 mulM(Mat4 a, Mat4 b) {
+        float[] matV = new float[16];
+        for ( int i = 0; i < matV.length; i++ ) {
+            // int ax = 0;
+            int ay = (int)(i/4f);
+            int bx = Math.floorMod(i, 4);
+            // int by = 0;
+            int cx = bx;
+            int cy = ay;
+            matV[cx + 4*cy] = (   a.mat[0 + ay*4]*b.mat[bx + 0*4]
+                                + a.mat[1 + ay*4]*b.mat[bx + 1*4] 
+                                + a.mat[2 + ay*4]*b.mat[bx + 2*4] 
+                                + a.mat[3 + ay*4]*b.mat[bx + 3*4]);
+        }
+        return new Mat4(matV);
+    }
+
+    public static Vec3 mulV(Mat4 a, Vec3 b){
+        return new Vec3(
+            b.x*a.mat[4*0+0]+b.y*a.mat[4*1+0]+b.z*a.mat[4*2+0]+a.mat[4*3+0],
+            b.x*a.mat[4*0+1]+b.y*a.mat[4*1+1]+b.z*a.mat[4*2+1]+a.mat[4*3+1],
+            b.x*a.mat[4*0+2]+b.y*a.mat[4*1+2]+b.z*a.mat[4*2+2]+a.mat[4*3+2]
+        );
     }
         
     public static Mat4 fairePerspective(float plan_proche, float plan_loin, float FOV, float ratio) {

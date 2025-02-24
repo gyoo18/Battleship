@@ -65,7 +65,7 @@ public class Fenêtre {
             this.fenêtre = fenêtre;
             return this;
         }
-
+        //cspell:ignore codescan
         @Override
         public void invoke(long fenêtre, int touche, int codescan, int action, int mods) {
             GestionnaireContrôles.surÉvénementTouche(this.fenêtre, touche, codescan, action, mods);

@@ -59,9 +59,9 @@ public class Caméra {
     public void tourner     (Vec3 rot) { vue.tourner     ( rot.opposé() ); }
     public void échelonner  (Vec3 éch) { vue.échelonner  ( éch.inv()    ); }
 
-    public Vec3 avoirPos () { return vue.avoirPos(); }
-    public Vec3 avoirRot () { return vue.avoirRot(); }
-    public Vec3 avoirÉch () { return vue.avoirÉch(); }
+    public Vec3 avoirPos () { return vue.avoirPos().opposé(); }
+    public Vec3 avoirRot () { return vue.avoirRot().opposé(); }
+    public Vec3 avoirÉch () { return vue.avoirÉch().inv(); }
 
     public Transformée avoirVue() {return vue;}
 }

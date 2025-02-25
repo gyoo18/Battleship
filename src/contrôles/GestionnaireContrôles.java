@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFW;
 import graphiques.Fenêtre;
 import jeu.Caméra;
 import jeu.Objet;
+import jeu.Plateau;
 import jeu.Scène;
 import maths.Mat4;
 import maths.Maths;
@@ -22,11 +23,13 @@ public class GestionnaireContrôles {
     private static Scène scène;
 
     private static Objet pointeur;
+    private static Plateau plateau;
 
     public static void initialiser(Fenêtre fenêtre){
         caméra = fenêtre.scène.caméra;
         scène = fenêtre.scène;
         pointeur = fenêtre.scène.obtenirObjet("pointeur");
+        plateau = (Plateau)fenêtre.scène.obtenirObjet("Plateau");
     }
 
     //cspell:ignore codescan
@@ -50,7 +53,7 @@ public class GestionnaireContrôles {
         } else {
             // Comme la transformée de la caméra est en mode Orbite, caméra.avoirPos() renvoie (0,0,rayon).
             // Il faut donc manuellement calculer la position de la caméra.
-            Vec3 camPos = new Vec3((float)(Math.cos(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x)),(float)Math.sin(caméra.avoirRot().x),(float)(-Math.sin(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x))).mult(-caméra.avoirVue().rayon);
+            Vec3 camPos = new Vec3((float)(Math.cos(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x)),(float)Math.sin(caméra.avoirRot().x),(float)(-Math.sin(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x))).mult(-caméra.avoirVue().avoirRayon());
 
             // Construction du vecteur qui pointe dans la direction du curseur
             // Direction dans laquelle pointe la caméra
@@ -73,11 +76,39 @@ public class GestionnaireContrôles {
             });     // Matrice de transformation de l'espace vue vers l'espace univers
             pointeurDir = Mat4.mulV(rotation, pointeurDir); // Multiplication matricielle
 
-            
-            pointeur.avoirTransformée().positionner( Maths.intersectionPlan(new Vec3(0), new Vec3(0,1,0), pointeurDir, camPos) );
+            Vec3 intersection = Maths.intersectionPlan(new Vec3(0), new Vec3(0,1,0), pointeurDir, camPos);
+            if (intersection != null){
+                pointeur.avoirTransformée().positionner( intersection );
+                plateau.surCurseurBouge(intersection);
+            }
         }
 
         positionPrécédenteCurseur.x = (float) xpos;
         positionPrécédenteCurseur.y = (float) ypos;
+    }
+
+    //cspell:ignore xoffset yoffset
+    public static void surMolletteSourisRoulée(Fenêtre fenêtre, double xoffset, double yoffset){
+        System.out.println(xoffset+";"+yoffset);
+        if (yoffset > 0){
+            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / ((float)yoffset + 0.05f));
+        }else{
+            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() * ((float)-yoffset + 0.05f));
+        }
+    }
+
+    public static void surSourisClique(Fenêtre fenêtre, int button, int action, int mods) {
+        switch (button){
+            case GLFW.GLFW_MOUSE_BUTTON_LEFT:
+                if (action == GLFW.GLFW_PRESS && CTRL_PRESSÉ == false){
+                    plateau.sélectionnerCaseSurvolée();
+                }
+                break;
+            case GLFW.GLFW_MOUSE_BUTTON_RIGHT:
+                if (action == GLFW.GLFW_PRESS && CTRL_PRESSÉ == false){
+                    plateau.surSourisCliqueDroit();
+                }
+                break;
+        }
     }
 }

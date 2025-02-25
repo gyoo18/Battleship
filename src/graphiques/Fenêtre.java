@@ -4,11 +4,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
 
 import contrôles.GestionnaireContrôles;
-import jeu.Caméra;
 import jeu.Scène;
-import maths.Vec3;
 import utils.Ressources;
 
 public class Fenêtre {
@@ -36,6 +36,8 @@ public class Fenêtre {
         GLFW.glfwSetFramebufferSizeCallback(glfwFenêtre, surFenêtreModifiée);
         GLFW.glfwSetKeyCallback(glfwFenêtre,surToucheClavier);
         GLFW.glfwSetCursorPosCallback(glfwFenêtre, surCurseurBouge);
+        GLFW.glfwSetScrollCallback(glfwFenêtre, surMolletteSourisRoulée);
+        GLFW.glfwSetMouseButtonCallback(glfwFenêtre, surSourisClique);
         GLFW.glfwShowWindow(glfwFenêtre);
     }
 
@@ -81,10 +83,42 @@ public class Fenêtre {
             return this;
         }
 
+        //cspell:ignore xpos ypos
         @Override
         public void invoke(long fenêtre, double xpos, double ypos) {
             GestionnaireContrôles.surCurseurBouge(this.fenêtre, xpos, ypos);
         }
+    }.donnerFenêtre(this);
+
+    private GLFWScrollCallback surMolletteSourisRoulée = new GLFWScrollCallback() {
+        private Fenêtre fenêtre;
+
+        public GLFWScrollCallback donnerFenêtre(Fenêtre fenêtre){
+            this.fenêtre = fenêtre;
+            return this;
+        }
+
+        //cspell:ignore xoffset yoffset
+        @Override
+        public void invoke(long window, double xoffset, double yoffset) {
+            GestionnaireContrôles.surMolletteSourisRoulée(fenêtre, xoffset, yoffset);
+        }
+        
+    }.donnerFenêtre(this);
+
+    private GLFWMouseButtonCallback surSourisClique = new GLFWMouseButtonCallback() {
+        private Fenêtre fenêtre;
+
+        public GLFWMouseButtonCallback donnerFenêtre(Fenêtre fenêtre){
+            this.fenêtre = fenêtre;
+            return this;
+        }
+
+        @Override
+        public void invoke(long window, int button, int action, int mods) {
+            GestionnaireContrôles.surSourisClique(fenêtre, button, action, mods);
+        }
+        
     }.donnerFenêtre(this);
 
     public void mettreÀJour(){

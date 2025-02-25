@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL46;
 
 import jeu.Objet;
+import jeu.Plateau;
 import jeu.Scène;
 import maths.*;
 import utils.Ressources;
@@ -81,8 +82,12 @@ public class Peintre {
 						GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"rotation"),false, new Mat4().mat);
 					}
 
-					if (o.nom == "Eau"){
+					if (o.avoirNuanceur().étiquettes.contains("temps")){
 						GL46.glUniform1f(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "temps"),(float)(System.currentTimeMillis()-Ressources.tempsInitial)/1000f);
+					}
+
+					if(o.avoirNuanceur().étiquettes.contains("plateau") && o instanceof Plateau){
+						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "posPlateau"),((Plateau)o).pointeurSurvol);
 					}
 
 					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"vue"),false,scène.caméra.avoirVue().avoirMat().mat);

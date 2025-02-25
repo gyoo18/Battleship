@@ -2,6 +2,7 @@ package graphiques;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Scanner;
 
@@ -12,6 +13,7 @@ public class Nuanceur {
     public int ID;
     public String[] uniformesNoms;
     public int[] uniformesID;
+    public ArrayList<String> étiquettes = new ArrayList<>();
 
     private String fragSource;
     private String somSource;

@@ -190,4 +190,46 @@ public class Mat4{
         this.mat = new Mat4().faireRotation(rotation, ordre).mulM(this).mat;
         return this;
     }
+
+    public Mat4 trans(){
+        float[] matV = new float[16];
+        for (int x = 0; x < 4; x++){
+            for (int y = 0; y < 4; y++){
+                matV[x + 4*y] = this.mat[y + 4*x];
+            }
+        }
+        this.mat = matV;
+        return this;
+    }
+
+    /*
+     * |a b c d|    |f g h|    |e g h|    |e f h|    |e f g|      |k l|    |j l|    |j k|       |j k|    |i l|    |i k|       |j l|    |j l|    |i j|       |i j|    |i k|    |i j|
+     * |e f g h| = a|j k l| - b|i k l| + c|i j l| - d|i j k| = a(f|o p| - g|n p| + h|n o|) - b(e|m o| - g|m p| + h|m o|) + c(e|n p| - f|n p| + h|m n|) - d(e|m n| - f|m o| + g|m n|)
+     * |i j k l|    |n o p|    |m o p|    |m n p|    |m n o| = a[ f(kp-lo) - g(jp-ln) + h(jo-kn) ] - b[ e(jo-km) - g(io-km) + h(io-km) ] + c[ e(jp-ln) - f(jp-ln) + h(in-jm) ] - d[ e(in-jm) - f(io-km) + g(in-jm) ]
+     * |m n o p|                                             = af(kp-lo) - ag(jp-ln) + ah(jo-kn)  - be(jo-km) + bg(io-km) - bh(io-km) + ce(jp-ln) - cf(jp-ln) + ch(in-jm) - de(in-jm) + df(io-km) - dg(in-jm)
+     *                                                       = afkp-aflo - agjp+agln + ahjo-ahkn  - bejo+bekm + bgio-bgkm - bhio-bhkm + cejp-celn - cfjp+cfln + chin-chjm - dein+dejm + dfio-dfkm - dgin+dgjm
+     * |0 4 8  12|
+     * |1 5 9  13|
+     * |2 6 10 14|
+     * |3 7 11 15|
+     */
+    public float det(){
+        float a = mat[0];
+        float b = mat[1];
+        float c = mat[2];
+        float d = mat[3];
+        float e = mat[4];
+        float f = mat[5];
+        float g = mat[6];
+        float h = mat[7];
+        float i = mat[8];
+        float j = mat[9];
+        float k = mat[10];
+        float l = mat[11];
+        float m = mat[12];
+        float n = mat[13];
+        float o = mat[14];
+        float p = mat[15];
+        return a*( f*(k*p-l*o) - g*(j*p-l*n) + h*(j*o-k*n) ) - b*( e*(j*o-k*m) - g*(i*o-k*m) + h*(i*o-k*m) ) + c*( e*(j*p-l*n) - f*(j*p-l*n) + h*(i*n-j*m) ) - d*( e*(i*n-j*m) - f*(i*o-k*m) + g*(i*n-j*m) );
+    }
 }

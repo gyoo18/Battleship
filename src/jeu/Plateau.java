@@ -87,73 +87,136 @@ public class Plateau extends Objet {
     public void sélectionnerCaseSurvolée(){
         if(bateauSélec == -1){
             for (int i = 0; i < N_BATEAUX; i++){
-                int px = Math.floorMod(pointeurSurvol,10);
-                int py = pointeurSurvol/10;
-                int bx = Math.floorMod(bateauxPos[i],10);
-                int by = bateauxPos[i]/10;
+                float px = (float)(Math.floorMod(pointeurSurvol,10));
+                float py = (float)(pointeurSurvol/10);
+                float bx = (float)(Math.floorMod(bateauxPos[i],10));
+                float by = (float)(bateauxPos[i]/10);
+                if(Math.floorMod(bateauxLong[i],2) == 0){
+                    switch(bateauxDir[i]){
+                        case NORD:
+                            by-=0.5;
+                            break;
+                        case SUD:
+                            by+=0.5;
+                            break;
+                        case EST:
+                            bx-=0.5;
+                            break;
+                        case OUEST:
+                            bx+=0.5;
+                            break;
+                    }
+                }
                 switch (bateauxDir[i]) {
                     case NORD:
-                        if(px == bx && 
-                            ( ( Math.floorMod(bateauxLong[i],2) == 1 && ( Math.abs(py-by) <= bateauxLong[i]/2 ) ) || 
-                            ( Math.floorMod(bateauxLong[i],2) == 0 && ( (py >= by && py-by <= bateauxLong[i]/2-1) || ( by >= py && by-py <= bateauxLong[i]/2) ) ) ) 
-                        ){
-                            bateauSélec = i;
-                        }
-                        continue;
                     case SUD:
-                        if(px == bx && 
-                            ( ( Math.floorMod(bateauxLong[i],2) == 1 && ( Math.abs(py-by) <= bateauxLong[i]/2 ) ) || 
-                            ( Math.floorMod(bateauxLong[i],2) == 0 && ( (by >= py && by-py <= bateauxLong[i]/2-1) || ( py >= by && py-by <= bateauxLong[i]/2) ) ) ) 
-                        ){
+                        if(px==bx && Math.abs(py-by) < (float)bateauxLong[i]/2f){
                             bateauSélec = i;
                         }
-                        continue;
+                        break;
                     case EST:
-                        if(py == by && 
-                            ( ( Math.floorMod(bateauxLong[i],2) == 1 && ( Math.abs(px-bx) <= bateauxLong[i]/2 ) ) || 
-                            ( Math.floorMod(bateauxLong[i],2) == 0 && ( (px >= bx && px-bx <= bateauxLong[i]/2-1) || ( bx >= px && bx-px <= bateauxLong[i]/2) ) ) ) 
-                        ){
-                            bateauSélec = i;
-                        }
-                        continue;
                     case OUEST:
-                        if(py == by && 
-                            ( ( Math.floorMod(bateauxLong[i],2) == 1 && ( Math.abs(px-bx) <= bateauxLong[i]/2 ) ) || 
-                            ( Math.floorMod(bateauxLong[i],2) == 0 && ( (bx >= px && bx-px <= bateauxLong[i]/2-1) || ( px >= bx && px-bx <= bateauxLong[i]/2) ) ) ) 
-                        ){
+                        if(py==by && Math.abs(px-bx) < (float)bateauxLong[i]/2f){
                             bateauSélec = i;
                         }
-                        continue;
+                        break;
+                }
+                if (bateauSélec != -1){
+                    miseÀJourBateaux();
+                    break;
                 }
             }
         } else {
 
-            // for (int i = 0; i < bateaux.length; i++) {
-            //     if (i == bateauSélec){
-            //         continue;
-            //     }
-            //     int bx1 = Math.floorMod(bateauxPos[bateauSélec],10);
-            //     int by1 = bateauxPos[bateauSélec]/10;
-            //     int bx2 = Math.floorMod(bateauxPos[i],10);
-            //     int by2 = bateauxPos[i]/10;
-            //     switch (bateauxDir[bateauSélec]){
-            //         case NORD:
-            //         case SUD:
-            //             switch (bateauxDir[i]){
-            //                 case NORD:
-            //                 case SUD:
-            //                     if(bx1 == bx2 && 
-            //                     ((by1))){}
-            //                     break;
-            //                 case EST:
-            //                 case OUEST:
-
-            //                     break;
-            //             }
-            //             break;
-            //     }
-            // }
-            bateauSélec = -1;
+            boolean collisionne = false;
+            for (int i = 0; i < bateaux.length; i++) {
+                if (i == bateauSélec){
+                    continue;
+                }
+                float bx1 = (float)(Math.floorMod(bateauxPos[bateauSélec],10));
+                float by1 = (float)(bateauxPos[bateauSélec]/10);
+                if (Math.floorMod(bateauxLong[bateauSélec],2) == 0){
+                    switch(bateauxDir[bateauSélec]){
+                        case NORD:
+                            by1-=0.5;
+                            break;
+                        case SUD:
+                            by1+=0.5;
+                            break;
+                        case EST:
+                            bx1-=0.5;
+                            break;
+                        case OUEST:
+                            bx1+=0.5;
+                            break;
+                    }
+                }
+                float bx2 = (float)(Math.floorMod(bateauxPos[i],10));
+                float by2 = (float)(bateauxPos[i]/10);
+                if (Math.floorMod(bateauxLong[i],2) == 0){
+                    switch(bateauxDir[i]){
+                        case NORD:
+                            by2-=0.5;
+                            break;
+                        case SUD:
+                            by2+=0.5;
+                            break;
+                        case EST:
+                            bx2-=0.5;
+                            break;
+                        case OUEST:
+                            bx2+=0.5;
+                            break;
+                    }
+                }
+                switch (bateauxDir[bateauSélec]){
+                    case NORD:
+                    case SUD:
+                        if (by1 + (float)bateauxLong[bateauSélec]/2f > 10f || by1 - (float)bateauxLong[bateauSélec]/2f < 0f){
+                            collisionne = true;
+                        } else {
+                            switch (bateauxDir[i]){
+                                case NORD:
+                                case SUD:
+                                    if(bx1 == bx2 && (Math.abs(by1-by2) < (float)(bateauxLong[bateauSélec]+bateauxLong[i])/2f)){
+                                        collisionne = true;
+                                    }
+                                    break;
+                                case EST:
+                                case OUEST:
+                                    if(Math.abs(bx1-bx2) < (float)bateauxLong[i]/2f && Math.abs(by1-by2) < (float)bateauxLong[bateauSélec]/2f){
+                                        collisionne = true;
+                                    }
+                                    break;
+                            }
+                        }
+                        break;
+                    case EST:
+                    case OUEST:
+                        if (bx1 + (float)bateauxLong[bateauSélec]/2f > 10f || bx1 - (float)bateauxLong[bateauSélec]/2f < 0f){
+                            collisionne = true;
+                        } else {
+                            switch (bateauxDir[i]){
+                                case NORD:
+                                case SUD:
+                                    if(Math.abs(by1-by2) < (float)bateauxLong[i]/2f && Math.abs(bx1-bx2) < (float)bateauxLong[bateauSélec]/2f){
+                                        collisionne = true;
+                                    }
+                                    break;
+                                case EST:
+                                case OUEST:
+                                    if(by1 == by2 && (Math.abs(bx1-bx2) < (float)(bateauxLong[bateauSélec]+bateauxLong[i])/2f)){
+                                        collisionne = true;
+                                    }
+                                    break;
+                            }
+                            break;
+                        }
+                }
+            }
+            if (!collisionne){
+                bateauSélec = -1;
+            }
             miseÀJourBateaux();
         }
     }

@@ -24,7 +24,7 @@ public class Transformée {
     private Mat4 matInv;
 
     private boolean estModifié = false;
-    private boolean estInvModifié = false;
+    private boolean estInvModifié = true;
 
     public Transformée(){
         pos = new Vec3(0);
@@ -47,7 +47,7 @@ public class Transformée {
         rotMat = new Mat4().tourner(rot, mOrdre);
         échMat = new Mat4().échelonner(éch);
 
-        mat = new Mat4().mulM(posMat).mulM(rotMat).mulM(échMat);
+        mat = new Mat4().mulM(échMat).mulM(rotMat).mulM(posMat);
     }
 
     public Transformée(Transformée t){

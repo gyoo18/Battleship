@@ -86,8 +86,10 @@ public class Peintre {
 						GL46.glUniform1f(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "temps"),(float)(System.currentTimeMillis()-Ressources.tempsInitial)/1000f);
 					}
 
-					if(o.avoirNuanceur().étiquettes.contains("plateau") && o instanceof Plateau){
-						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "posPlateau"),((Plateau)o).pointeurSurvol);
+					if(o.avoirNuanceur().étiquettes.contains("plateau") && Ressources.IDPointeurTouché == o.ID){
+						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "posPlateau"),Ressources.pointeurSurvol);
+					} else {
+						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "posPlateau"),-1);
 					}
 
 					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"vue"),false,scène.caméra.avoirVue().avoirMat().mat);

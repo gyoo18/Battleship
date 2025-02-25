@@ -12,9 +12,11 @@ import maths.Maths;
 import maths.Vec2;
 import maths.Vec3;
 import utils.Ressources;
+import utils.Ressources.ÉtatJeu;
 
 public class GestionnaireContrôles {
     private static boolean CTRL_PRESSÉ = false;
+    private static boolean ESPACE_PRESSÉ = false;
     
     private static Vec2 positionPrécédenteCurseur = new Vec2(0);
     private static Vec2 caméraRotation = new Vec2(0);
@@ -42,6 +44,32 @@ public class GestionnaireContrôles {
                     CTRL_PRESSÉ = false;
                 }
                 break;
+            case GLFW.GLFW_KEY_SPACE:
+                if (action == GLFW.GLFW_PRESS && !ESPACE_PRESSÉ){
+                    ESPACE_PRESSÉ = true;
+                    switch (Ressources.étatJeu) {
+                        case POSITIONNEMENT:
+                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
+                            plateau.transitionnerÀBatailleTourA();
+                            caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            break;
+                        case BATAILLE_TOUR_A:
+                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
+                            plateau.transitionnerÀBatailleTourB();
+                            caméra.avoirVue().positionner(new Vec3(0f));
+                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            break;
+                        case BATAILLE_TOUR_B:
+                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
+                            plateau.transitionnerÀBatailleTourA();
+                            caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            break;
+                    }
+                } else if (action == GLFW.GLFW_RELEASE){
+                    ESPACE_PRESSÉ = false;
+                }
         }
     }
     //cspell:ignore xpos, ypos
@@ -53,7 +81,7 @@ public class GestionnaireContrôles {
         } else {
             // Comme la transformée de la caméra est en mode Orbite, caméra.avoirPos() renvoie (0,0,rayon).
             // Il faut donc manuellement calculer la position de la caméra.
-            Vec3 camPos = new Vec3((float)(Math.cos(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x)),(float)Math.sin(caméra.avoirRot().x),(float)(-Math.sin(caméra.avoirRot().y-Math.PI/2)*Math.cos(caméra.avoirRot().x))).mult(-caméra.avoirVue().avoirRayon());
+            Vec3 camPos = Mat4.mulV(caméra.avoirVue().avoirInv(), new Vec3(0f));
 
             // Construction du vecteur qui pointe dans la direction du curseur
             // Direction dans laquelle pointe la caméra
@@ -75,12 +103,9 @@ public class GestionnaireContrôles {
                 0,   0,   0,   1
             });     // Matrice de transformation de l'espace vue vers l'espace univers
             pointeurDir = Mat4.mulV(rotation, pointeurDir); // Multiplication matricielle
+            //pointeur.avoirTransformée().positionner(Vec3.addi(camPos,Vec3.mult(pointeurDir,10f))).faireÉchelle(new Vec3(1f));
 
-            Vec3 intersection = Maths.intersectionPlan(new Vec3(0), new Vec3(0,1,0), pointeurDir, camPos);
-            if (intersection != null){
-                pointeur.avoirTransformée().positionner( intersection );
-                plateau.surCurseurBouge(intersection);
-            }
+            plateau.surCurseurBouge( pointeurDir, camPos );
         }
 
         positionPrécédenteCurseur.x = (float) xpos;

@@ -32,8 +32,8 @@ public class App {
 
         scène.caméra.avoirVue().estOrbite = true;
         scène.caméra.avoirVue().donnerRayon(700);
-        scène.caméra.planProche = 1f;
-        scène.caméra.planLoin = 2000f;
+        scène.caméra.planProche = 10f;
+        scène.caméra.planLoin = 5000f;
         scène.caméra.surFenêtreModifiée();
 
         fenêtre.lierPeintre(peintre);

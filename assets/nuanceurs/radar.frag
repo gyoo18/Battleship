@@ -4,6 +4,7 @@ precision mediump float;
 
 in vec2 uv_O;
 in vec3 norm_O;
+in float z;
 
 uniform float temps;
 uniform int posPlateau;
@@ -52,5 +53,9 @@ float tex(vec2 uv){
 
 //cspell:ignore cretes ecume
 void main(){
-    Fragment = vec4(vec3(0.2,0.8,0.2)*tex(uv_O),1.0)*(0.5*dot(norm_O,vec3(0.0,1.0,0.0)) + 1.0);
+    float brouillard = s(1.0 - 1.0/exp(0.000575646273249*z));
+
+    vec3 col = vec3(0.2,0.8,0.2)*tex(uv_O)*(0.5*dot(norm_O,vec3(0.0,1.0,0.0)) + 1.0);
+
+    Fragment = vec4(mix(col,vec3(0.6),brouillard),1.0);
 }

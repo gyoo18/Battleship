@@ -29,7 +29,7 @@ public class Peintre {
 		
 		GL.createCapabilities();
 		
-		GL46.glClearColor(0.25f, 0.5f, 0.8f, 1f);
+		GL46.glClearColor(0.6f, 0.6f, 0.6f, 1f);
 
 		GL46.glEnable(GL46.GL_DEPTH_TEST);
 

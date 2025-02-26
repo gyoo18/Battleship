@@ -114,7 +114,6 @@ public class GestionnaireContrôles {
 
     //cspell:ignore xoffset yoffset
     public static void surMolletteSourisRoulée(Fenêtre fenêtre, double xoffset, double yoffset){
-        System.out.println(xoffset+";"+yoffset);
         if (yoffset > 0){
             caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / ((float)yoffset + 0.05f));
         }else{

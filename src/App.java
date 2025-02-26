@@ -26,8 +26,8 @@ public class App {
         Scène scène = new Scène();
         Ressources.scèneActuelle = scène;
         plateau.ajouterObjets(scène);
-        // scène.ajouterObjet(plateauAdverse);
-        // plateauAdverse.ajouterBateaux(scène);
+        scène.ajouterObjet(plateauAdverse);
+        plateauAdverse.ajouterObjets(scène);
         scène.ajouterObjet(pointeur);
 
         scène.caméra.avoirVue().estOrbite = true;
@@ -42,12 +42,10 @@ public class App {
         peintre.lierScène(scène);
         GestionnaireContrôles.initialiser(fenêtre);
 
-        // plateau.avoirTransformée().tourner(new Vec3(0f,(float)Math.PI/4f,0f));
+        plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,2000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
         while (fenêtre.actif){
             fenêtre.mettreÀJour();
-            plateau.avoirTransformée().tourner(new Vec3(0f, .001f,0f));
-            //GestionnaireContrôles.surCurseurBouge(fenêtre, 0, 0);
         }
     }
 }

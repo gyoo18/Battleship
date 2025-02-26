@@ -76,7 +76,7 @@ public class Plateau extends Objet {
             pineBlanche = new Objet("PineBlanche", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
 
             Maillage porteAvionM = Chargeur.chargerOBJ("assets/maillages/Porte-Avion.obj");
-            Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaTexturé");
+            Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/bateaux");
             Texture porteAvionTx = Chargeur.chargerTexture("assets/textures/Porte-Avion.png");
             Objet porteAvion = new Objet("Porte-Avion",porteAvionM,nuanceur,null,porteAvionTx,new Transformée().positionner(new Vec3(-270f,0f,-150f)));
             bateaux[0] = porteAvion;

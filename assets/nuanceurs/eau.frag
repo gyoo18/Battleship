@@ -6,6 +6,7 @@ in vec3 norm_O;
 in vec2 uv_O;
 in vec3 posCam;
 in vec3 posObj;
+in float z;
 
 uniform vec4 Coul; //cspell:ignore Coul
 uniform float temps;
@@ -105,5 +106,7 @@ void main(){
     float diff = min( max( dot( norm, vec3(0,1,0) ), 0.2), 1.0);
     float spec = mix(pow(dot(reflect(vue,norm),vec3(0,1,0)),mix(10.0,0.0,ecume)),0.0,ecume);
 
-    Fragment = vec4(mix(mix(Coul.rgb,vec3(0.8,0.8,0.8),ecume),vec3(1.0,0.0,1.0),contour)*diff + spec, Coul.a);
+    float brouillard = s(1.0 - 1.0/exp(0.000575646273249*z));
+
+    Fragment = vec4(mix(mix(mix(Coul.rgb,vec3(0.8,0.8,0.8),ecume),vec3(1.0,0.0,1.0),contour)*diff + spec, vec3(0.6), brouillard), Coul.a);
 }

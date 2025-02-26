@@ -25,6 +25,12 @@ public class Transformée {
 
     private boolean estModifié = false;
     private boolean estInvModifié = true;
+    private int nModifié = 0;
+    private int nParentModifié = 0;
+    private int nInvModifié = 0;
+    private int nParentInvModifié = 0;
+
+    private Transformée parent = null;
 
     public Transformée(){
         pos = new Vec3(0);
@@ -62,17 +68,21 @@ public class Transformée {
         mat = new Mat4(t.mat);
     }
     
-    public Vec3 avoirPos(){return pos;}
-    public Vec3 avoirRot(){return rot;}
-    public Vec3 avoirÉch(){return éch;}
+    public Vec3 avoirPos(){return parent==null?pos:Mat4.mulV(parent.avoirMat(), pos);}
+    public Vec3 avoirRot(){return parent==null?rot:Vec3.addi(rot,parent.avoirRot());}
+    public Vec3 avoirÉch(){return parent==null?éch:Vec3.mult(éch,parent.avoirÉch());}
+    public Vec3 avoirPosRel(){return pos;}
+    public Vec3 avoirRotRel(){return rot;}
+    public Vec3 avoirÉchRel(){return éch;}
     public float avoirRayon(){return rayon;}
-    public Mat4 avoirPosMat(){return posMat;}
-    public Mat4 avoirRotMat(){return rotMat;}
-    public Mat4 avoirÉchMat(){return échMat;}
+    public Mat4 avoirPosMat(){return parent==null?posMat:Mat4.mulM(posMat,parent.avoirPosMat());}
+    public Mat4 avoirRotMat(){return parent==null?rotMat:Mat4.mulM(rotMat,parent.avoirRotMat());}
+    public Mat4 avoirÉchMat(){return parent==null?échMat:Mat4.mulM(échMat,parent.avoirÉchMat());}
 
     public Transformée positionner(Vec3 p){
         pos = p.copier();
         posMat = new Mat4().translation(p);
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -80,6 +90,7 @@ public class Transformée {
 
     public Transformée donnerRayon(float r){
         rayon = r;
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -88,6 +99,7 @@ public class Transformée {
     public Transformée faireRotation(Vec3 r){
         rot = r.copier();
         rotMat = new Mat4().faireRotation(r, mOrdre);
+        if (!estModifié){nModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -96,6 +108,7 @@ public class Transformée {
     public Transformée faireÉchelle(Vec3 e){
         éch = e.copier();
         échMat = new Mat4().faireÉchelle(e);
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -104,6 +117,7 @@ public class Transformée {
     public Transformée translation(Vec3 t){
         pos.addi(t);
         posMat.translation(t);
+        if (!estModifié){nModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -111,6 +125,7 @@ public class Transformée {
 
     public Transformée changerRayon(float r){
         rayon += r;
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -119,6 +134,7 @@ public class Transformée {
     public Transformée tourner(Vec3 r){
         rot.addi(r);
         rotMat.tourner(r, mOrdre);
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
@@ -127,13 +143,38 @@ public class Transformée {
     public Transformée échelonner(Vec3 e){
         éch.mult(e);
         échMat.échelonner(e);
+        if (!estModifié){nModifié++;nInvModifié++;}
         estModifié = true;
         estInvModifié = true;
         return this;
     }
 
+    private boolean estModifié(){
+        if (parent != null){
+            boolean parentModifié = parent.estModifié();
+            if(nParentModifié != parent.nModifié){
+                nParentModifié = parent.nModifié; 
+                parentModifié = true;
+            }
+            return estModifié || parentModifié;
+        }
+        return estModifié;
+    }
+
+    private boolean estInvModifié(){
+        if (parent != null){
+            boolean parentModifié = parent.estInvModifié();
+            if(nParentInvModifié != parent.nInvModifié){
+                nParentInvModifié = parent.nInvModifié; 
+                parentModifié = true;
+            }
+            return estInvModifié || parentModifié;
+        }
+        return estInvModifié;
+    }
+
     public Mat4 avoirMat(){
-        if (estModifié){
+        if (estModifié()){
             if (estOrbite){
                 mat = new Mat4().mulM(posMat).mulM(rotMat).mulM(new Mat4().positionner(new Vec3(0,0,rayon))).mulM(échMat);
             }else{
@@ -143,12 +184,16 @@ public class Transformée {
                 mat.mulM(rotMat);
                 mat.mulM(posMat);
             }
+            if (parent != null){
+                mat = Mat4.mulM(mat, parent.avoirMat());
+            }
+            estModifié = false;
         }
         return mat;
     }
 
     public Mat4 avoirInv(){
-        if (estInvModifié){
+        if (estInvModifié()){
             posMatInv = new Mat4(new float[]{
                 1f, 0f, 0f, 0f,
                 0f, 1f, 0f, 0f,
@@ -171,9 +216,37 @@ public class Transformée {
                 matInv.mulM(rotMatInv);
                 matInv.mulM(échMatInv);
             }
+            if (parent != null){
+                matInv = Mat4.mulM(parent.avoirInv(),matInv);
+            }
             estInvModifié = false;
         }
 
         return matInv;
+    }
+
+    //cspell:ignore parenter
+    public void parenter(Transformée t){
+        parent = t;
+        estModifié = true;
+        estInvModifié = true;
+    }
+
+    public void déParenter(){
+        parent = null;
+        estModifié = true;
+        estInvModifié = true;
+    }
+
+    public void déParenterConserverPosition(){
+        pos = avoirPos();
+        rot = avoirRot();
+        éch = avoirÉch();
+        positionner(pos);
+        faireRotation(rot);
+        faireÉchelle(éch);
+        mat = avoirMat();
+        matInv = avoirInv();
+        parent = null;
     }
 }

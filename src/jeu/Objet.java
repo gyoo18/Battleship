@@ -11,6 +11,7 @@ import maths.Vec4;
 public class Objet {
     public int ID;
     public String nom;
+    public boolean dessiner = true;
 
     private Maillage maillage = null;
     private Nuanceur nuanceur = null;
@@ -77,6 +78,12 @@ public class Objet {
         if (aMaillage){maillage.construire();}
         if (aNuanceur){nuanceur.construire();}
         if (aTexture) {texture.construire();}
+    }
+
+    public Objet copier(){
+        Objet o = new Objet(nom, maillage, nuanceur, couleur, texture, transformée);
+        o.dessiner = dessiner;
+        return o;
     }
 
 }

@@ -1,5 +1,7 @@
 package jeu;
 
+import java.util.ArrayList;
+
 //cspell:ignore énérateur Sélec
 import graphiques.GénérateurMaillage;
 import graphiques.Maillage;
@@ -30,21 +32,28 @@ public class Plateau extends Objet {
     private int[] bateauxPos = new int[N_BATEAUX];
     private int bateauSélec = -1;
 
+    private ArrayList<Objet> pines = new ArrayList<>();
+    private Objet pineRouge;
+    private Objet pineBlanche;
+
     public Objet radar;
+    public Objet plateau;
 
     public Plateau(String nom) {
-        super(nom,
-        GénérateurMaillage.générerGrille(51, 51),
-        null,
-        new Vec4(9f/255f, 16f/255f, 65f/255f,1f),
-        null,
-        new Transformée().faireÉchelle(new Vec3(60*10)).positionner(new Vec3(-30*10,0,-30*10)));
+        super(nom);
+        donnerTransformée(new Transformée());
 
         try{
             Nuanceur nuaEau = Chargeur.chargerNuanceurFichier("assets/nuanceurs/eau");
-            donnerNuanceur(nuaEau);
             nuaEau.étiquettes.add("temps");
             nuaEau.étiquettes.add("plateau");
+            plateau = new Objet(nom,
+                            GénérateurMaillage.générerGrille(51, 51),
+                            nuaEau,
+                            new Vec4(9f/255f, 16f/255f, 65f/255f,1f),
+                            null,
+                            new Transformée().faireÉchelle(new Vec3(60*10)).positionner(new Vec3(-30*10,0,-30*10)));
+            plateau.avoirTransformée().parenter(avoirTransformée());
 
             Nuanceur nuaRadar = Chargeur.chargerNuanceurFichier("assets/nuanceurs/radar");
             nuaRadar.étiquettes.add("temps");
@@ -59,6 +68,12 @@ public class Plateau extends Objet {
                                 new Vec3(0f),
                                 new Vec3(60f*10f)
                             ));
+            radar.avoirTransformée().parenter(avoirTransformée());
+            
+            Maillage pineM = Chargeur.chargerOBJ("assets/maillages/Pine.obj");
+            Nuanceur nuaPine = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaColoré");
+            pineRouge = new Objet("PineRouge", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
+            pineBlanche = new Objet("PineBlanche", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
 
             Maillage porteAvionM = Chargeur.chargerOBJ("assets/maillages/Porte-Avion.obj");
             Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaTexturé");
@@ -68,6 +83,7 @@ public class Plateau extends Objet {
             bateauxDir[0] = Dir.NORD;
             bateauxLong[0] = 5;
             bateauxPos[0] = 20;
+            porteAvion.avoirTransformée().parenter(avoirTransformée());
 
             Maillage croiseurM = Chargeur.chargerOBJ("assets/maillages/Croiseur.obj");
             Texture croiseurTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
@@ -76,12 +92,15 @@ public class Plateau extends Objet {
             bateauxDir[1] = Dir.NORD;
             bateauxLong[1] = 4;
             bateauxPos[1] = 21;
+            croiseur.avoirTransformée().parenter(avoirTransformée());
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void ajouterBateaux(Scène scène){
+    public void ajouterObjets(Scène scène){
+        scène.ajouterObjet(this);
+        scène.ajouterObjet(plateau);
         scène.ajouterObjet(radar);
         for (Objet e : bateaux){
             scène.ajouterObjet(e);
@@ -89,16 +108,19 @@ public class Plateau extends Objet {
     }
 
     public void surCurseurBouge(Vec3 pointeurDir, Vec3 camPos){
-        Vec3 interPlateau = Maths.intersectionPlan(avoirTransformée().avoirPos(), new Vec3(0f,1f,0f), pointeurDir, camPos);
+        Vec3 interPlateau = Maths.intersectionPlan(plateau.avoirTransformée().avoirPos(), new Vec3(0f,1f,0f), pointeurDir, camPos);
         Vec3 interRadar = Maths.intersectionPlan(radar.avoirTransformée().avoirPos(), Mat4.mulV(radar.avoirTransformée().avoirRotMat(), new Vec3(0,1,0)), pointeurDir, camPos);
-        Vec3 posPlateau = interPlateau!=null?Mat4.mulV(avoirTransformée().avoirInv(), interPlateau):null;
+        Vec3 posPlateau = interPlateau!=null?Mat4.mulV(plateau.avoirTransformée().avoirInv(), interPlateau):null;
         Vec3 posRadar = interRadar!=null?Mat4.mulV(radar.avoirTransformée().avoirInv(), interRadar):null;
+        Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(Vec3.mult(posRadar,100f));
         if(posPlateau != null && posPlateau.x >= 0f && posPlateau.x <= 1f && posPlateau.z >= 0f && posPlateau.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posPlateau.z) + (int)(10f*posPlateau.x);
-            Ressources.IDPointeurTouché = ID;
+            Ressources.IDPointeurTouché = plateau.ID;
+            
         }else if (posRadar != null && posRadar.x >= 0f && posRadar.x <= 1f && posRadar.z >= 0f && posRadar.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posRadar.z) + (int)(10f*posRadar.x);
             Ressources.IDPointeurTouché = radar.ID;
+            //Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(interRadar);
         }else if (bateauSélec == -1){
             Ressources.pointeurSurvol = -1;
             Ressources.IDPointeurTouché = -1;

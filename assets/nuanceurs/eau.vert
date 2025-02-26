@@ -16,7 +16,7 @@ uniform float temps;
 out vec3 norm_O;
 out vec2 uv_O;
 out vec3 posCam;
-out vec3 posMonde;
+out vec3 posObj;
 
 float s(float x){
     return -2.0*x*x*x + 3.0*x*x;
@@ -64,6 +64,6 @@ void main(){
     norm_O = (rotation*vec4(norm,1)).xyz;
     uv_O = uv;
     posCam = (inverse(vue)*vec4(0.0,0.0,0.0,1.0)).xyz;
-    posMonde = (transforme*vec4(pos,1.0)).xyz;
-    gl_Position = projection*vue*(transforme*vec4(pos,1.0) + vec4(0,10.0*h_vague(0.003*posMonde.xz),0,0));
+    posObj = (vec4(pos,1.0)*600.0).xyz;
+    gl_Position = projection*vue*(transforme*vec4(pos,1.0) + vec4(0,10.0*h_vague(0.003*posObj.xz),0,0));
 }

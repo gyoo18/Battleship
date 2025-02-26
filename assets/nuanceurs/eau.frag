@@ -5,7 +5,7 @@ precision mediump float;
 in vec3 norm_O;
 in vec2 uv_O;
 in vec3 posCam;
-in vec3 posMonde;
+in vec3 posObj;
 
 uniform vec4 Coul; //cspell:ignore Coul
 uniform float temps;
@@ -81,8 +81,8 @@ void main(){
     int indexe = int(10*floor(10*uv_O.y) + floor(10*uv_O.x));
     contour = contour*float(indexe == posPlateau);
     
-    float vague_hauteur = 0.02*h_vague(0.003*posMonde.xz);
-    float vague_hauteur_l = h_vague_l(0.003*posMonde.xz);
+    float vague_hauteur = 0.02*h_vague(0.003*posObj.xz);
+    float vague_hauteur_l = h_vague_l(0.003*posObj.xz);
     vec3 norm = -normalize(cross(dFdx(vec3(uv_O.x,vague_hauteur,uv_O.y)),dFdy(vec3(uv_O.x,vague_hauteur,uv_O.y))));
     vec3 norm_l = -normalize(cross(dFdx(vec3(uv_O.x,0.05*vague_hauteur_l,uv_O.y)),dFdy(vec3(uv_O.x,0.05*vague_hauteur_l,uv_O.y))));
     float cretes = max(50.0*max(dFdx(vague_hauteur_l),dFdy(vague_hauteur_l)),1.0)*(vague_hauteur_l)*(vague_hauteur_l);
@@ -92,13 +92,13 @@ void main(){
     derriere = 1.0-derriere;
     derriere = derriere*derriere*derriere;
     derriere = 1.0-derriere;
-    vec3 vue = normalize(posMonde-posCam);
-    float u = (0.003*posMonde.x*sin(AV*3.1416/180.0)+0.003*posMonde.z*cos(AV*3.1416/180.0));
-    float d = 0.05*bruitp(0.05*posMonde.x,0.05*posMonde.z,0.1*temps,0.5);
+    vec3 vue = normalize(posObj-posCam);
+    float u = (0.003*posObj.x*sin(AV*3.1416/180.0)+0.003*posObj.z*cos(AV*3.1416/180.0));
+    float d = 0.05*bruitp(0.05*posObj.x,0.05*posObj.z,0.1*temps,0.5);
     float ecume_traces = 1.0*max(sin(50.0*(u+d))*sin(50.0*(u+d))*sin(50.0*(u+d)),0.0)*derriere*(1.0-pow(1.0-vague_hauteur_l,4.0));
     float b = 0;
     for (int i = 1; i <= 4; i++){
-        b += (2.0/(exp(1.5*i)*i))*bruitp(0.05*posMonde.x - cos(AV)*(0.1/i)*temps,0.05*posMonde.z - sin(AV)*(0.1/i)*temps,(0.1/i)*temps,1.0/(i*i*i));
+        b += (2.0/(exp(1.5*i)*i))*bruitp(0.05*posObj.x - cos(AV)*(0.1/i)*temps,0.05*posObj.z - sin(AV)*(0.1/i)*temps,(0.1/i)*temps,1.0/(i*i*i));
     }
     float ecume = min(max(ecume_traces,cretes)*b,1.0);
 

@@ -59,7 +59,7 @@ public class Peintre {
 		if (scène.estConstruite){
 			ArrayList<Objet> objets = scène.objets;
 			for (Objet o : objets){
-				if (o.aMaillage() && o.aNuanceur()){
+				if (o.dessiner && o.aMaillage() && o.aNuanceur()){
 					o.avoirMaillage().préparerAuDessin();
 					GL46.glUseProgram(o.avoirNuanceur().ID);
 

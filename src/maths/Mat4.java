@@ -188,6 +188,7 @@ public class Mat4{
     
     public Mat4 tourner(Vec3 rotation, MOrdre ordre) {
         this.mat = new Mat4().faireRotation(rotation, ordre).mulM(this).mat;
+        //mulM(new Mat4().faireRotation(rotation, ordre));
         return this;
     }
 

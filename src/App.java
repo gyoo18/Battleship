@@ -11,6 +11,7 @@ import maths.Vec3;
 import maths.Vec4;
 import utils.Chargeur;
 import utils.Ressources;
+import utils.Ressources.ÉtatJeu;
 public class App {
     public static void main(String[] args) throws Exception {
         Fenêtre fenêtre = new Fenêtre();
@@ -46,9 +47,18 @@ public class App {
 
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
-        boolean a = false;
         while (fenêtre.actif){
             fenêtre.mettreÀJour();
+            if (Ressources.étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
+                plateauAdverse.tirerAléatoire(plateau);
+                Ressources.transitionnerÀBatailleTourA();
+            }
+            if(Ressources.étatJeu == ÉtatJeu.A_GAGNÉ){
+                System.out.println("Vous avez gagné!");
+            }
+            if(Ressources.étatJeu == ÉtatJeu.B_GAGNÉ){
+                System.out.println("Vous avez perdus!");
+            }
         }
     }
 }

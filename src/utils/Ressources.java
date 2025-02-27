@@ -10,7 +10,9 @@ public class Ressources {
     public enum ÉtatJeu{
         POSITIONNEMENT,
         BATAILLE_TOUR_A,
-        BATAILLE_TOUR_B
+        BATAILLE_TOUR_B,
+        B_GAGNÉ,
+        A_GAGNÉ
     }
 
     public static float ratioFenêtre = 1f;
@@ -29,15 +31,28 @@ public class Ressources {
     }
 
     public static void transitionnerÀBatailleTourA(){
-        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
-        Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
-        plateau.transitionnerÀBatailleTourA();
-        scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+        if(étatJeu != ÉtatJeu.B_GAGNÉ && étatJeu != ÉtatJeu.A_GAGNÉ){
+            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
+            Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
+            plateau.transitionnerÀBatailleTourA();
+            scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+        }
     }
     public static void transitionnerÀBatailleTourB(){
-        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
-        Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
-        plateau.transitionnerÀBatailleTourB();
-        scèneActuelle.caméra.avoirVue().positionner(new Vec3(0f));
+        if(étatJeu != ÉtatJeu.B_GAGNÉ && étatJeu != ÉtatJeu.A_GAGNÉ){
+            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
+            Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
+            plateau.transitionnerÀBatailleTourB();
+            scèneActuelle.caméra.avoirVue().positionner(new Vec3(0f));
+        }
+    }
+
+    public static void annoncerGagnant(){
+        if (étatJeu == ÉtatJeu.BATAILLE_TOUR_A){
+            étatJeu = ÉtatJeu.A_GAGNÉ;
+        }
+        if (étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
+            étatJeu = ÉtatJeu.B_GAGNÉ;
+        }
     }
 }

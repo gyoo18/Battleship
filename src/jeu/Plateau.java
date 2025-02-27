@@ -25,11 +25,19 @@ public class Plateau extends Objet {
         OUEST
     };
 
+    private enum TirRes{
+        MANQUÉ,
+        TOUCHÉ,
+        COULÉ
+    }
+
     private int N_BATEAUX = 5;
     private Objet[] bateaux = new Objet[N_BATEAUX];
     private Dir[] bateauxDir = new Dir[N_BATEAUX];
     private int[] bateauxLong = new int[N_BATEAUX];
     private int[] bateauxPos = new int[N_BATEAUX];
+    private int[] bateauxTouchés = new int[N_BATEAUX];
+    private boolean[] bateauxCoulés = new boolean[N_BATEAUX];
     private int bateauSélec = -1;
 
     private ArrayList<Objet> pines = new ArrayList<>();
@@ -65,7 +73,7 @@ public class Plateau extends Objet {
                             null,
                             null, 
                             new Transformée(
-                                new Vec3(-60f*5f,0f,60f*5f),
+                                new Vec3(-60f*5f,0f,60f*5f + 180f),
                                 new Vec3(0f),
                                 new Vec3(60f*10f)
                             ));
@@ -262,6 +270,7 @@ public class Plateau extends Objet {
         Vec3 interRadar = Maths.intersectionPlan(radar.avoirTransformée().avoirPos(), Mat4.mulV(radar.avoirTransformée().avoirRotMat(), new Vec3(0,1,0)), pointeurDir, camPos);
         Vec3 posPlateau = interPlateau!=null?Mat4.mulV(plateau.avoirTransformée().avoirInv(), interPlateau):null;
         Vec3 posRadar = interRadar!=null?Mat4.mulV(radar.avoirTransformée().avoirInv(), interRadar):null;
+        Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(interRadar);
         if(posPlateau != null && posPlateau.x >= 0f && posPlateau.x <= 1f && posPlateau.z >= 0f && posPlateau.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posPlateau.z) + (int)(10f*posPlateau.x);
             Ressources.IDPointeurTouché = plateau.ID;
@@ -288,35 +297,82 @@ public class Plateau extends Objet {
                     miseÀJourBateaux();
                 }
             } else {
-
                 if(collisionne(bateauxPos[bateauSélec], bateauxDir[bateauSélec], bateauxLong[bateauSélec], bateauSélec) == -1){
                     bateauSélec = -1;
                 }
                 miseÀJourBateaux();
             }
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
-
             if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
-                int collision = ((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")).collisionne(Ressources.pointeurSurvol, Dir.NORD, 1, -1);
-                Objet pine;
-                if (collision != -1 && collision != N_BATEAUX){
-                    pine = pineRouge.copier();
-                }else if (collision != N_BATEAUX){
-                    pine = pineBlanche.copier();
-                }else{
-                    return;
-                }
-                pinesPos.add(Ressources.pointeurSurvol);
-                pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(Ressources.pointeurSurvol,10)/10f+0.05f, 0f, (float)(Ressources.pointeurSurvol/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
-                pine.avoirTransformée().parenter(radar.avoirTransformée());
-                pines.add(pine);
-                Ressources.scèneActuelle.ajouterObjet(pine);
+                tirer(((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")),Ressources.pointeurSurvol);
                 Ressources.transitionnerÀBatailleTourB();
             }
-
-        } else if (Ressources.étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
-
         }
+    }
+
+    public void tirerAléatoire(Plateau cible){
+        boolean tiré = false;
+        while(!tiré){
+            int pos = (int)(Math.random()*99.5);
+            if (!pinesPos.contains(pos)){
+                tirer(cible,pos);
+                tiré = true;
+            }
+        }
+    }
+
+    public void tirer(Plateau cible, int pos){
+        TirRes tir = cible.frapper(pos);
+        Objet pine;
+        if (tir == TirRes.MANQUÉ){
+            pine = pineBlanche.copier();
+        }else{
+            pine = pineRouge.copier();
+        }
+        pinesPos.add(pos);
+        pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(pos,10)/10f+0.05f, 0f, (float)(pos/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
+        pine.avoirTransformée().parenter(radar.avoirTransformée());
+        pines.add(pine);
+        Ressources.scèneActuelle.ajouterObjet(pine);
+    }
+
+    public TirRes frapper(int pos){
+        int collision = collisionne(pos, Dir.NORD, 1, -1);
+        TirRes res;
+        
+        if (collision != -1 && collision != N_BATEAUX){
+            bateauxTouchés[collision]++;
+            if(bateauxTouchés[collision] == bateauxLong[collision]){
+                bateauxCoulés[collision] = true;
+                res = TirRes.COULÉ;
+
+                boolean perdus = true;
+                for (int i = 0; i < N_BATEAUX; i++){
+                    perdus = perdus && bateauxCoulés[i];
+                }
+                if(perdus){
+                    Ressources.annoncerGagnant();
+                }
+            } else {
+                res = TirRes.TOUCHÉ;
+            }
+        } else {
+            res = TirRes.MANQUÉ;
+        }
+
+        Objet pine;
+        if (res == TirRes.MANQUÉ){
+            pine = pineBlanche.copier();
+        }else{
+            pine = pineRouge.copier();
+        }
+        // pinesPos.add(pos);
+        pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(pos,10)/10f+0.05f, 0f, (float)(pos/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
+        pine.avoirTransformée().parenter(plateau.avoirTransformée());
+        // pines.add(pine);
+        Ressources.scèneActuelle.ajouterObjet(pine);
+
+        return res;
     }
 
     public void surSourisCliqueDroit(){

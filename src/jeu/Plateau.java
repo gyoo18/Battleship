@@ -297,8 +297,16 @@ public class Plateau extends Objet {
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
 
             if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
+                int collision = ((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")).collisionne(Ressources.pointeurSurvol, Dir.NORD, 1, -1);
+                Objet pine;
+                if (collision != -1 && collision != N_BATEAUX){
+                    pine = pineRouge.copier();
+                }else if (collision != N_BATEAUX){
+                    pine = pineBlanche.copier();
+                }else{
+                    return;
+                }
                 pinesPos.add(Ressources.pointeurSurvol);
-                Objet pine = pineBlanche.copier();
                 pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(Ressources.pointeurSurvol,10)/10f+0.05f, 0f, (float)(Ressources.pointeurSurvol/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
                 pine.avoirTransformée().parenter(radar.avoirTransformée());
                 pines.add(pine);

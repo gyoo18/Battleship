@@ -49,22 +49,13 @@ public class GestionnaireContrôles {
                     ESPACE_PRESSÉ = true;
                     switch (Ressources.étatJeu) {
                         case POSITIONNEMENT:
-                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
-                            plateau.transitionnerÀBatailleTourA();
-                            caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
-                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            Ressources.transitionnerÀBatailleTourA();
                             break;
                         case BATAILLE_TOUR_A:
-                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
-                            plateau.transitionnerÀBatailleTourB();
-                            caméra.avoirVue().positionner(new Vec3(0f));
-                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            //Ressources.transitionnerÀBatailleTourB();
                             break;
                         case BATAILLE_TOUR_B:
-                            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
-                            plateau.transitionnerÀBatailleTourA();
-                            caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
-                            pointeur.avoirTransformée().positionner(caméra.avoirPos());
+                            Ressources.transitionnerÀBatailleTourA();
                             break;
                     }
                 } else if (action == GLFW.GLFW_RELEASE){

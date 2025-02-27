@@ -12,6 +12,7 @@ public class Objet {
     public int ID;
     public String nom;
     public boolean dessiner = true;
+    public boolean estConstruit = false;
 
     private Maillage maillage = null;
     private Nuanceur nuanceur = null;
@@ -56,9 +57,9 @@ public class Objet {
         return ID;
     }
 
-    public void donnerMaillage    (Maillage     m) {maillage     = m; aMaillage    = true;}
-    public void donnerNuanceur    (Nuanceur     n) {nuanceur     = n; aNuanceur    = true;}
-    public void donnerTexture     (Texture     tx) {texture      =tx; aTexture     = true;}
+    public void donnerMaillage    (Maillage     m) {maillage     = m; aMaillage    = true; estConstruit = estConstruit && m.estConstruit; }
+    public void donnerNuanceur    (Nuanceur     n) {nuanceur     = n; aNuanceur    = true; estConstruit = estConstruit && n.estConstruit; }
+    public void donnerTexture     (Texture     tx) {texture      =tx; aTexture     = true; estConstruit = estConstruit && tx.estConstruit;}
     public void donnerCouleur     (Vec4         c) {couleur      = c; aCouleur     = true;}
     public void donnerTransformée (Transformée tr) {transformée = tr; aTransformée = true;}
 
@@ -68,7 +69,7 @@ public class Objet {
     public Vec4        avoirCouleur()     {return couleur;    }
     public Transformée avoirTransformée() {return transformée;}
 
-    public boolean aMaillage()    {return aMaillage;   }
+    public boolean aMaillage()    {return aMaillage; }
     public boolean aNuanceur()    {return aNuanceur;   }
     public boolean aTexture()     {return aTexture;    }
     public boolean aCouleur()     {return aCouleur;    }
@@ -78,6 +79,7 @@ public class Objet {
         if (aMaillage){maillage.construire();}
         if (aNuanceur){nuanceur.construire();}
         if (aTexture) {texture.construire();}
+        estConstruit = true;
     }
 
     public Objet copier(){

@@ -33,6 +33,7 @@ public class Plateau extends Objet {
     private int bateauSélec = -1;
 
     private ArrayList<Objet> pines = new ArrayList<>();
+    private ArrayList<Integer> pinesPos = new ArrayList<>();
     private Objet pineRouge;
     private Objet pineBlanche;
 
@@ -71,9 +72,10 @@ public class Plateau extends Objet {
             radar.avoirTransformée().parenter(avoirTransformée());
             
             Maillage pineM = Chargeur.chargerOBJ("assets/maillages/Pine.obj");
-            Nuanceur nuaPine = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaColoré");
+            Nuanceur nuaPine = Chargeur.chargerNuanceurFichier("assets/nuanceurs/pine");
             pineRouge = new Objet("PineRouge", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
-            pineBlanche = new Objet("PineBlanche", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
+            pineBlanche = new Objet("PineBlanche", pineM, nuaPine, new Vec4(0.8f,0.8f,0.8f,1f), null, null);
+            //pineBlanche.donnerTransformée(new Transformée());
 
             Maillage porteAvionM = Chargeur.chargerOBJ("assets/maillages/Porte-Avion.obj");
             Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/bateaux");
@@ -112,7 +114,7 @@ public class Plateau extends Objet {
         Vec3 interRadar = Maths.intersectionPlan(radar.avoirTransformée().avoirPos(), Mat4.mulV(radar.avoirTransformée().avoirRotMat(), new Vec3(0,1,0)), pointeurDir, camPos);
         Vec3 posPlateau = interPlateau!=null?Mat4.mulV(plateau.avoirTransformée().avoirInv(), interPlateau):null;
         Vec3 posRadar = interRadar!=null?Mat4.mulV(radar.avoirTransformée().avoirInv(), interRadar):null;
-        Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(Vec3.mult(posRadar,100f));
+        //Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(Mat4.mulV(radar.avoirTransformée().avoirMat(), interPlateau)).faireÉchelle(new Vec3(1f/600f));
         if(posPlateau != null && posPlateau.x >= 0f && posPlateau.x <= 1f && posPlateau.z >= 0f && posPlateau.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posPlateau.z) + (int)(10f*posPlateau.x);
             Ressources.IDPointeurTouché = plateau.ID;
@@ -269,6 +271,16 @@ public class Plateau extends Objet {
                 miseÀJourBateaux();
             }
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
+
+            if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
+                pinesPos.add(Ressources.pointeurSurvol);
+                Objet pine = pineBlanche.copier();
+                pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(Ressources.pointeurSurvol,10)/10f+0.05f, 0f, (float)(Ressources.pointeurSurvol/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
+                pine.avoirTransformée().parenter(radar.avoirTransformée());
+                pines.add(pine);
+                Ressources.scèneActuelle.ajouterObjet(pine);
+                Ressources.transitionnerÀBatailleTourB();
+            }
 
         } else if (Ressources.étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
 

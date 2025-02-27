@@ -14,6 +14,7 @@ public class Nuanceur {
     public String[] uniformesNoms;
     public int[] uniformesID;
     public ArrayList<String> étiquettes = new ArrayList<>();
+    public boolean estConstruit = false;
 
     private String fragSource;
     private String somSource;
@@ -93,6 +94,8 @@ public class Nuanceur {
             uniformesNoms[i] = GL46.glGetActiveUniform(ID, i, bb, bb);
             uniformesID[i] = GL46.glGetUniformLocation(ID, uniformesNoms[i]);
         }
+
+        estConstruit = true;
     }
 
     public int uniformeIndexe(String nom){

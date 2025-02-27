@@ -1,6 +1,9 @@
 package utils;
 
+import jeu.Plateau;
 import jeu.Scène;
+import maths.Mat4;
+import maths.Vec3;
 
 public class Ressources {
 
@@ -23,5 +26,18 @@ public class Ressources {
         fenêtreLargeur = largeur;
         fenêtreHauteur = hauteur;
         ratioFenêtre = (float)largeur/(float)hauteur;
+    }
+
+    public static void transitionnerÀBatailleTourA(){
+        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
+        Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
+        plateau.transitionnerÀBatailleTourA();
+        scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+    }
+    public static void transitionnerÀBatailleTourB(){
+        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
+        Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
+        plateau.transitionnerÀBatailleTourB();
+        scèneActuelle.caméra.avoirVue().positionner(new Vec3(0f));
     }
 }

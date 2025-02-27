@@ -11,7 +11,6 @@ import maths.Vec3;
 import maths.Vec4;
 import utils.Chargeur;
 import utils.Ressources;
-
 public class App {
     public static void main(String[] args) throws Exception {
         Fenêtre fenêtre = new Fenêtre();
@@ -44,6 +43,7 @@ public class App {
 
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,2000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
+        boolean a = false;
         while (fenêtre.actif){
             fenêtre.mettreÀJour();
         }

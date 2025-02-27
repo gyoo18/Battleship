@@ -270,7 +270,6 @@ public class Plateau extends Objet {
         Vec3 interRadar = Maths.intersectionPlan(radar.avoirTransformée().avoirPos(), Mat4.mulV(radar.avoirTransformée().avoirRotMat(), new Vec3(0,1,0)), pointeurDir, camPos);
         Vec3 posPlateau = interPlateau!=null?Mat4.mulV(plateau.avoirTransformée().avoirInv(), interPlateau):null;
         Vec3 posRadar = interRadar!=null?Mat4.mulV(radar.avoirTransformée().avoirInv(), interRadar):null;
-        Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(interRadar);
         if(posPlateau != null && posPlateau.x >= 0f && posPlateau.x <= 1f && posPlateau.z >= 0f && posPlateau.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posPlateau.z) + (int)(10f*posPlateau.x);
             Ressources.IDPointeurTouché = plateau.ID;

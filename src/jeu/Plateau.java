@@ -25,7 +25,7 @@ public class Plateau extends Objet {
         OUEST
     };
 
-    private int N_BATEAUX = 2;
+    private int N_BATEAUX = 5;
     private Objet[] bateaux = new Objet[N_BATEAUX];
     private Dir[] bateauxDir = new Dir[N_BATEAUX];
     private int[] bateauxLong = new int[N_BATEAUX];
@@ -75,12 +75,11 @@ public class Plateau extends Objet {
             Nuanceur nuaPine = Chargeur.chargerNuanceurFichier("assets/nuanceurs/pine");
             pineRouge = new Objet("PineRouge", pineM, nuaPine, new Vec4(0.8f,0.2f,0.2f,1f), null, null);
             pineBlanche = new Objet("PineBlanche", pineM, nuaPine, new Vec4(0.8f,0.8f,0.8f,1f), null, null);
-            //pineBlanche.donnerTransformée(new Transformée());
 
             Maillage porteAvionM = Chargeur.chargerOBJ("assets/maillages/Porte-Avion.obj");
             Nuanceur nuanceur = Chargeur.chargerNuanceurFichier("assets/nuanceurs/bateaux");
             Texture porteAvionTx = Chargeur.chargerTexture("assets/textures/Porte-Avion.png");
-            Objet porteAvion = new Objet("Porte-Avion",porteAvionM,nuanceur,null,porteAvionTx,new Transformée().positionner(new Vec3(-270f,0f,-150f)));
+            Objet porteAvion = new Objet("Porte-Avion",porteAvionM,nuanceur,null,porteAvionTx,new Transformée());
             bateaux[0] = porteAvion;
             bateauxDir[0] = Dir.NORD;
             bateauxLong[0] = 5;
@@ -89,15 +88,161 @@ public class Plateau extends Objet {
 
             Maillage croiseurM = Chargeur.chargerOBJ("assets/maillages/Croiseur.obj");
             Texture croiseurTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
-            Objet croiseur = new Objet("Destroyer",croiseurM,nuanceur,null,croiseurTx,new Transformée().positionner(new Vec3(-210f,0f,-180f)));
+            Objet croiseur = new Objet("Croiseur",croiseurM,nuanceur,null,croiseurTx,new Transformée());
             bateaux[1] = croiseur;
             bateauxDir[1] = Dir.NORD;
             bateauxLong[1] = 4;
             bateauxPos[1] = 21;
             croiseur.avoirTransformée().parenter(avoirTransformée());
+
+            Maillage destroyerM = Chargeur.chargerOBJ("assets/maillages/Destroyer.obj");
+            Texture destroyerTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
+            Objet destroyer = new Objet("Destroyer",destroyerM,nuanceur,null,destroyerTx,new Transformée());
+            bateaux[2] = destroyer;
+            bateauxDir[2] = Dir.NORD;
+            bateauxLong[2] = 3;
+            bateauxPos[2] = 22;
+            destroyer.avoirTransformée().parenter(avoirTransformée());
+            bateaux[3] = destroyer.copier();
+            bateauxDir[3] = Dir.NORD;
+            bateauxLong[3] = 3;
+            bateauxPos[3] = 23;
+
+            Maillage torpilleurM = Chargeur.chargerOBJ("assets/maillages/Torpilleur.obj");
+            Texture torpilleurTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
+            Objet torpilleur = new Objet("Torpilleur",torpilleurM,nuanceur,null,torpilleurTx,new Transformée());
+            bateaux[4] = torpilleur;
+            bateauxDir[4] = Dir.NORD;
+            bateauxLong[4] = 2;
+            bateauxPos[4] = 24;
+            torpilleur.avoirTransformée().parenter(avoirTransformée());
+
+            miseÀJourBateaux();
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void placerBateauxAléatoirement(){
+        for (int i = 0; i < N_BATEAUX; i++){
+            boolean placé = false;
+            while (!placé){
+                int randPos = (int)(Math.random()*99.5);
+                int randDir = (int)(Math.random()*3.5);
+                Dir randDirE = null;
+                switch (randDir) {
+                    case 0:
+                        randDirE = Dir.NORD;
+                        break;
+                    case 1:
+                        randDirE = Dir.OUEST;
+                        break;
+                    case 2:
+                        randDirE = Dir.SUD;
+                        break;
+                    case 3:
+                        randDirE = Dir.EST;
+                        break;
+                }
+                int collision = collisionne(randPos, randDirE, bateauxLong[i], i);
+                if (collision == -1){
+                    bateauxPos[i] = randPos;
+                    bateauxDir[i] = randDirE;
+                    placé = true;
+                }
+            }
+        }
+        miseÀJourBateaux();
+    }
+
+    private int collisionne(int pos, Dir dir, int l, int ib){
+        for (int i = 0; i < N_BATEAUX; i++){
+            if(i == ib){
+                continue;
+            }
+
+            float bx1 = (float)(Math.floorMod(pos,10));
+            float by1 = (float)(pos/10);
+            if (Math.floorMod(l,2) == 0){
+                switch(dir){
+                    case NORD:
+                        by1-=0.5;
+                        break;
+                    case SUD:
+                        by1+=0.5;
+                        break;
+                    case EST:
+                        bx1-=0.5;
+                        break;
+                    case OUEST:
+                        bx1+=0.5;
+                        break;
+                }
+            }
+            float bx2 = (float)(Math.floorMod(bateauxPos[i],10));
+            float by2 = (float)(bateauxPos[i]/10);
+            if (Math.floorMod(bateauxLong[i],2) == 0){
+                switch(bateauxDir[i]){
+                    case NORD:
+                        by2-=0.5;
+                        break;
+                    case SUD:
+                        by2+=0.5;
+                        break;
+                    case EST:
+                        bx2-=0.5;
+                        break;
+                    case OUEST:
+                        bx2+=0.5;
+                        break;
+                }
+            }
+            switch (dir){
+                case NORD:
+                case SUD:
+                    if (by1 + (float)l/2f > 10f || by1 - (float)l/2f < -0.5f){
+                        return N_BATEAUX;
+                    } else {
+                        switch (bateauxDir[i]){
+                            case NORD:
+                            case SUD:
+                                if(bx1 == bx2 && (Math.abs(by1-by2) < (float)(l+bateauxLong[i])/2f)){
+                                    return i;
+                                }
+                                break;
+                            case EST:
+                            case OUEST:
+                                if(Math.abs(bx1-bx2) < (float)bateauxLong[i]/2f && Math.abs(by1-by2) < (float)l/2f){
+                                    return i;
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case EST:
+                case OUEST:
+                    if (bx1 + (float)l/2f > 10f || bx1 - (float)l/2f < -0.5f){
+                        return N_BATEAUX;
+                    } else {
+                        switch (bateauxDir[i]){
+                            case NORD:
+                            case SUD:
+                                if(Math.abs(by1-by2) < (float)bateauxLong[i]/2f && Math.abs(bx1-bx2) < (float)l/2f){
+                                    return i;
+                                }
+                                break;
+                            case EST:
+                            case OUEST:
+                                if(by1 == by2 && (Math.abs(bx1-bx2) < (float)(l+bateauxLong[i])/2f)){
+                                    return i;
+                                }
+                                break;
+                        }
+                        break;
+                    }
+            }
+        }
+        return -1;
     }
 
     public void ajouterObjets(Scène scène){
@@ -105,6 +250,9 @@ public class Plateau extends Objet {
         scène.ajouterObjet(plateau);
         scène.ajouterObjet(radar);
         for (Objet e : bateaux){
+            if(e == null){
+                continue;
+            }
             scène.ajouterObjet(e);
         }
     }
@@ -114,15 +262,12 @@ public class Plateau extends Objet {
         Vec3 interRadar = Maths.intersectionPlan(radar.avoirTransformée().avoirPos(), Mat4.mulV(radar.avoirTransformée().avoirRotMat(), new Vec3(0,1,0)), pointeurDir, camPos);
         Vec3 posPlateau = interPlateau!=null?Mat4.mulV(plateau.avoirTransformée().avoirInv(), interPlateau):null;
         Vec3 posRadar = interRadar!=null?Mat4.mulV(radar.avoirTransformée().avoirInv(), interRadar):null;
-        //Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(Mat4.mulV(radar.avoirTransformée().avoirMat(), interPlateau)).faireÉchelle(new Vec3(1f/600f));
         if(posPlateau != null && posPlateau.x >= 0f && posPlateau.x <= 1f && posPlateau.z >= 0f && posPlateau.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posPlateau.z) + (int)(10f*posPlateau.x);
             Ressources.IDPointeurTouché = plateau.ID;
-            
         }else if (posRadar != null && posRadar.x >= 0f && posRadar.x <= 1f && posRadar.z >= 0f && posRadar.z <= 1f){
             Ressources.pointeurSurvol = 10*(int)(10f*posRadar.z) + (int)(10f*posRadar.x);
             Ressources.IDPointeurTouché = radar.ID;
-            //Ressources.scèneActuelle.obtenirObjet("pointeur").avoirTransformée().positionner(interRadar);
         }else if (bateauSélec == -1){
             Ressources.pointeurSurvol = -1;
             Ressources.IDPointeurTouché = -1;
@@ -137,135 +282,14 @@ public class Plateau extends Objet {
     public void sélectionnerCaseSurvolée(){
         if (Ressources.étatJeu == Ressources.ÉtatJeu.POSITIONNEMENT){
             if(bateauSélec == -1){
-                for (int i = 0; i < N_BATEAUX; i++){
-                    float px = (float)(Math.floorMod(Ressources.pointeurSurvol,10));
-                    float py = (float)(Ressources.pointeurSurvol/10);
-                    float bx = (float)(Math.floorMod(bateauxPos[i],10));
-                    float by = (float)(bateauxPos[i]/10);
-                    if(Math.floorMod(bateauxLong[i],2) == 0){
-                        switch(bateauxDir[i]){
-                            case NORD:
-                                by-=0.5;
-                                break;
-                            case SUD:
-                                by+=0.5;
-                                break;
-                            case EST:
-                                bx-=0.5;
-                                break;
-                            case OUEST:
-                                bx+=0.5;
-                                break;
-                        }
-                    }
-                    switch (bateauxDir[i]) {
-                        case NORD:
-                        case SUD:
-                            if(px==bx && Math.abs(py-by) < (float)bateauxLong[i]/2f){
-                                bateauSélec = i;
-                            }
-                            break;
-                        case EST:
-                        case OUEST:
-                            if(py==by && Math.abs(px-bx) < (float)bateauxLong[i]/2f){
-                                bateauSélec = i;
-                            }
-                            break;
-                    }
-                    if (bateauSélec != -1){
-                        miseÀJourBateaux();
-                        break;
-                    }
+                int collision = collisionne(Ressources.pointeurSurvol, Dir.NORD, 1, -1);
+                if (collision != -1 && collision != N_BATEAUX){
+                    bateauSélec = collision;
+                    miseÀJourBateaux();
                 }
             } else {
 
-                boolean collisionne = false;
-                for (int i = 0; i < bateaux.length; i++) {
-                    if (i == bateauSélec){
-                        continue;
-                    }
-                    float bx1 = (float)(Math.floorMod(bateauxPos[bateauSélec],10));
-                    float by1 = (float)(bateauxPos[bateauSélec]/10);
-                    if (Math.floorMod(bateauxLong[bateauSélec],2) == 0){
-                        switch(bateauxDir[bateauSélec]){
-                            case NORD:
-                                by1-=0.5;
-                                break;
-                            case SUD:
-                                by1+=0.5;
-                                break;
-                            case EST:
-                                bx1-=0.5;
-                                break;
-                            case OUEST:
-                                bx1+=0.5;
-                                break;
-                        }
-                    }
-                    float bx2 = (float)(Math.floorMod(bateauxPos[i],10));
-                    float by2 = (float)(bateauxPos[i]/10);
-                    if (Math.floorMod(bateauxLong[i],2) == 0){
-                        switch(bateauxDir[i]){
-                            case NORD:
-                                by2-=0.5;
-                                break;
-                            case SUD:
-                                by2+=0.5;
-                                break;
-                            case EST:
-                                bx2-=0.5;
-                                break;
-                            case OUEST:
-                                bx2+=0.5;
-                                break;
-                        }
-                    }
-                    switch (bateauxDir[bateauSélec]){
-                        case NORD:
-                        case SUD:
-                            if (by1 + (float)bateauxLong[bateauSélec]/2f > 10f || by1 - (float)bateauxLong[bateauSélec]/2f < 0f){
-                                collisionne = true;
-                            } else {
-                                switch (bateauxDir[i]){
-                                    case NORD:
-                                    case SUD:
-                                        if(bx1 == bx2 && (Math.abs(by1-by2) < (float)(bateauxLong[bateauSélec]+bateauxLong[i])/2f)){
-                                            collisionne = true;
-                                        }
-                                        break;
-                                    case EST:
-                                    case OUEST:
-                                        if(Math.abs(bx1-bx2) < (float)bateauxLong[i]/2f && Math.abs(by1-by2) < (float)bateauxLong[bateauSélec]/2f){
-                                            collisionne = true;
-                                        }
-                                        break;
-                                }
-                            }
-                            break;
-                        case EST:
-                        case OUEST:
-                            if (bx1 + (float)bateauxLong[bateauSélec]/2f > 10f || bx1 - (float)bateauxLong[bateauSélec]/2f < 0f){
-                                collisionne = true;
-                            } else {
-                                switch (bateauxDir[i]){
-                                    case NORD:
-                                    case SUD:
-                                        if(Math.abs(by1-by2) < (float)bateauxLong[i]/2f && Math.abs(bx1-bx2) < (float)bateauxLong[bateauSélec]/2f){
-                                            collisionne = true;
-                                        }
-                                        break;
-                                    case EST:
-                                    case OUEST:
-                                        if(by1 == by2 && (Math.abs(bx1-bx2) < (float)(bateauxLong[bateauSélec]+bateauxLong[i])/2f)){
-                                            collisionne = true;
-                                        }
-                                        break;
-                                }
-                                break;
-                            }
-                    }
-                }
-                if (!collisionne){
+                if(collisionne(bateauxPos[bateauSélec], bateauxDir[bateauSélec], bateauxLong[bateauSélec], bateauSélec) == -1){
                     bateauSélec = -1;
                 }
                 miseÀJourBateaux();
@@ -309,6 +333,9 @@ public class Plateau extends Objet {
 
     private void miseÀJourBateaux(){
         for (int i = 0; i < N_BATEAUX; i++){
+            if(bateaux[i] == null){
+                continue;
+            }
             switch (bateauxDir[i]) {
                 case NORD:
                     bateaux[i].avoirTransformée().faireRotation(new Vec3(0,0,0));

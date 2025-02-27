@@ -29,6 +29,9 @@ public class App {
         plateauAdverse.ajouterObjets(scène);
         scène.ajouterObjet(pointeur);
 
+        plateau.placerBateauxAléatoirement();
+        plateauAdverse.placerBateauxAléatoirement();
+
         scène.caméra.avoirVue().estOrbite = true;
         scène.caméra.avoirVue().donnerRayon(700);
         scène.caméra.planProche = 10f;
@@ -41,7 +44,7 @@ public class App {
         peintre.lierScène(scène);
         GestionnaireContrôles.initialiser(fenêtre);
 
-        plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,2000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
+        plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
         boolean a = false;
         while (fenêtre.actif){

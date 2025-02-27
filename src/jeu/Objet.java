@@ -76,14 +76,14 @@ public class Objet {
     public boolean aTransformée() {return aTransformée;}
 
     public void construire(){
-        if (aMaillage){maillage.construire();}
-        if (aNuanceur){nuanceur.construire();}
-        if (aTexture) {texture.construire();}
+        if (aMaillage && !maillage.estConstruit){maillage.construire();}
+        if (aNuanceur && !nuanceur.estConstruit){nuanceur.construire();}
+        if (aTexture && !texture.estConstruit) {texture.construire();}
         estConstruit = true;
     }
 
     public Objet copier(){
-        Objet o = new Objet(nom, maillage, nuanceur, couleur, texture, transformée);
+        Objet o = new Objet(nom, maillage, nuanceur, couleur, texture, transformée!=null?transformée.copier():null);
         o.dessiner = dessiner;
         return o;
     }

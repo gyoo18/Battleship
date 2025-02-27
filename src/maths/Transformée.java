@@ -41,7 +41,12 @@ public class Transformée {
         rotMat = new Mat4();
         échMat = new Mat4();
 
+        posMatInv = new Mat4();
+        rotMatInv = new Mat4();
+        échMatInv = new Mat4();
+
         mat = new Mat4();
+        matInv = new Mat4();
     }
 
     public Transformée(Vec3 pos, Vec3 rot, Vec3 éch){
@@ -53,7 +58,12 @@ public class Transformée {
         rotMat = new Mat4().tourner(rot, mOrdre);
         échMat = new Mat4().échelonner(éch);
 
+        posMatInv = new Mat4();
+        rotMatInv = new Mat4();
+        échMatInv = new Mat4();
+
         mat = new Mat4().mulM(échMat).mulM(rotMat).mulM(posMat);
+        matInv = new Mat4();
     }
 
     public Transformée(Transformée t){
@@ -65,7 +75,12 @@ public class Transformée {
         rotMat = new Mat4(t.rotMat);
         échMat = new Mat4(t.échMat);
 
+        posMatInv = new Mat4();
+        rotMatInv = new Mat4();
+        échMatInv = new Mat4();
+
         mat = new Mat4(t.mat);
+        matInv = new Mat4();
     }
     
     public Vec3 avoirPos(){return parent==null?pos:Mat4.mulV(parent.avoirMat(), pos);}
@@ -248,5 +263,37 @@ public class Transformée {
         mat = avoirMat();
         matInv = avoirInv();
         parent = null;
+    }
+
+    public Transformée copier(){
+        Transformée t = new Transformée();
+        t.mOrdre = mOrdre;
+        t.estOrbite = estOrbite;
+
+        t.pos = pos.copier();
+        t.rot = rot.copier();
+        t.éch = éch.copier();
+        t.rayon = rayon;
+
+        t.posMat = new Mat4(posMat.mat);
+        t.rotMat = new Mat4(rotMat.mat);
+        t.échMat = new Mat4(échMat.mat);
+
+        t.posMatInv = new Mat4(posMatInv.mat);
+        t.rotMatInv = new Mat4(rotMatInv.mat);
+        t.échMatInv = new Mat4(échMat.mat);
+
+        t.mat = new Mat4(mat.mat);
+        t.matInv = new Mat4(matInv.mat);
+
+        t.estModifié = estModifié;
+        t.estInvModifié = estInvModifié;
+        t.nModifié = nModifié;
+        t.nParentModifié = nParentModifié;
+        t.nInvModifié = nInvModifié;
+        t.nParentInvModifié = nParentInvModifié;
+
+        t.parent = parent;
+        return t;
     }
 }

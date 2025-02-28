@@ -1,8 +1,13 @@
 package maths;
 
+import java.util.ArrayList;
+
+import org.lwjgl.system.windows.MONITORINFOEX;
+
+import animations.Animable;
 import maths.Mat4.MOrdre;
 
-public class Transformée {
+public class Transformée implements Animable{
     
     public MOrdre mOrdre = MOrdre.XYZ;
     public boolean estOrbite = false;
@@ -295,5 +300,67 @@ public class Transformée {
 
         t.parent = parent;
         return t;
+    }
+
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {
+        this.pos = Vec3.addi(Vec3.mult((Vec3)a[0],1f-m),Vec3.mult((Vec3)b[0],m));
+        this.rot = Vec3.addi(Vec3.mult((Vec3)a[1],1f-m),Vec3.mult((Vec3)b[1],m));
+        this.éch = Vec3.addi(Vec3.mult((Vec3)a[2],1f-m),Vec3.mult((Vec3)b[2],m));
+        this.rayon = (float)a[3]*(1f-m) + (float)b[3]*m;
+        positionner(pos);
+        faireRotation(rot);
+        faireÉchelle(éch);
+        if(m >= 1f){
+            this.parent = (Transformée)b[4];
+        }
+        if(m >= 1f){
+            this.mOrdre = (MOrdre)b[5];
+        }
+        estModifié = true;
+        estInvModifié = true;
+        nModifié++;
+        nInvModifié++;
+    }
+
+    @Override
+    public Object[] animClé() {
+        Object[] res = new Object[9];
+        res[0] = pos.copier();
+        res[1] = rot.copier();
+        res[2] = éch.copier();
+        res[3] = rayon;
+        res[4] = parent!=null?parent.copier():null;
+        res[5] = mOrdre;
+
+        return res;
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        if(c.length != 9 ||
+            !(c[0] instanceof Vec3) ||
+            !(c[1] instanceof Vec3) ||
+            !(c[2] instanceof Vec3) ||
+            !(c[3] instanceof Float)||
+            !(c[4] instanceof Transformée || c[7] == null) ||
+            !(c[5] instanceof MOrdre)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        this.pos = (Vec3)cléB[0];
+        this.rot = (Vec3)cléB[1];
+        this.éch = (Vec3)cléB[2];
+        this.rayon = (float)cléB[3];
+        this.parent = (Transformée)cléB[4];
+        this.mOrdre = (MOrdre)cléB[5];
+        estModifié = true;
+        estInvModifié = true;
+        nModifié++;
+        nInvModifié++;
     }
 }

@@ -3,7 +3,9 @@ package maths;
 import java.lang.Math;
 import java.security.InvalidParameterException;
 
-public class Mat4{
+import animations.Animable;
+
+public class Mat4 implements Animable{
     public enum MOrdre{
         XYZ,
         XZY,
@@ -33,7 +35,7 @@ public class Mat4{
     		throw new IllegalArgumentException("La longueur de la liste doit être exactement 16.");
     	} 
     	else {
-    		this.mat = matb;
+    		this.mat = matb.clone();
     	}
     }
         
@@ -232,5 +234,52 @@ public class Mat4{
         float o = mat[14];
         float p = mat[15];
         return a*( f*(k*p-l*o) - g*(j*p-l*n) + h*(j*o-k*n) ) - b*( e*(j*o-k*m) - g*(i*o-k*m) + h*(i*o-k*m) ) + c*( e*(j*p-l*n) - f*(j*p-l*n) + h*(i*n-j*m) ) - d*( e*(i*n-j*m) - f*(i*o-k*m) + g*(i*n-j*m) );
+    }
+
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {
+        for (int i = 0; i < 16; i++){
+            mat[i] = (float)a[i]*(1f-m) + (float)b[i]*m;
+        }
+    }
+
+    @Override
+    public Object[] animClé() {
+        Object[] res = new Object[16];
+        for (int i = 0; i < 16; i++){
+            res[i] = mat[i];
+        }
+        return res;
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        if (c.length != 16 || 
+        !(c[0] instanceof Float) ||
+        !(c[1] instanceof Float) ||
+        !(c[2] instanceof Float) ||
+        !(c[3] instanceof Float) ||
+        !(c[4] instanceof Float) ||
+        !(c[5] instanceof Float) ||
+        !(c[6] instanceof Float) ||
+        !(c[7] instanceof Float) ||
+        !(c[8] instanceof Float) ||
+        !(c[9] instanceof Float) ||
+        !(c[10] instanceof Float) ||
+        !(c[11] instanceof Float) ||
+        !(c[12] instanceof Float) ||
+        !(c[13] instanceof Float) ||
+        !(c[14] instanceof Float) ||
+        !(c[15] instanceof Float)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        for (int i = 0; i < 16; i++){
+            mat[i] = (float)cléB[i];
+        }
     }
 }

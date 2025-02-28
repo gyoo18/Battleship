@@ -1,3 +1,4 @@
+import animations.GestionnaireAnimations;
 import contrôles.GestionnaireContrôles;
 import graphiques.Fenêtre;
 import graphiques.Maillage;
@@ -48,11 +49,8 @@ public class App {
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
         while (fenêtre.actif){
+            GestionnaireAnimations.mettreÀJourAnimations();
             fenêtre.mettreÀJour();
-            if (Ressources.étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
-                plateauAdverse.tirerAléatoire(plateau);
-                Ressources.transitionnerÀBatailleTourA();
-            }
             if(Ressources.étatJeu == ÉtatJeu.A_GAGNÉ){
                 System.out.println("Vous avez gagné!");
             }

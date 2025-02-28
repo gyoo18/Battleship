@@ -1,8 +1,12 @@
 package maths;
+
+
+import animations.Animable;
+
 /**
  * Vecteur à deux dimensions en coordonées cartésiennes (x,y)
  */
-public class Vec2 {
+public class Vec2 implements Animable{
     public float x;
     public float y;
 
@@ -212,5 +216,30 @@ public class Vec2 {
      */
     public Vec2 opposé(){
         return new Vec2(-x,-y);
+    }
+
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {
+        x = (float)a[0]*(1f-m) + (float)b[0]*m;
+        y = (float)a[1]*(1f-m) + (float)b[2]*m;
+    }
+
+    @Override
+    public Object[] animClé() {
+        return new Object[]{x,y};
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        if (c.length != 2 || !(c[0] instanceof Float) || !(c[1] instanceof Float)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        x = (float)cléB[0];
+        y = (float)cléB[1];
     }
 }

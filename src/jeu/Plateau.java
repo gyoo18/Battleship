@@ -2,6 +2,8 @@ package jeu;
 
 import java.util.ArrayList;
 
+import animations.GestionnaireAnimations;
+import animations.GestionnaireAnimations.Interpolation;
 //cspell:ignore énérateur Sélec
 import graphiques.GénérateurMaillage;
 import graphiques.Maillage;
@@ -125,7 +127,7 @@ public class Plateau extends Objet {
             bateauxPos[4] = 24;
             torpilleur.avoirTransformée().parenter(avoirTransformée());
 
-            miseÀJourBateaux();
+            miseÀJourBateaux(false);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -160,7 +162,7 @@ public class Plateau extends Objet {
                 }
             }
         }
-        miseÀJourBateaux();
+        miseÀJourBateaux(false);
     }
 
     private int collisionne(int pos, Dir dir, int l, int ib){
@@ -283,7 +285,7 @@ public class Plateau extends Objet {
 
         if (bateauSélec != -1){
             bateauxPos[bateauSélec] = Ressources.pointeurSurvol;
-            miseÀJourBateaux();
+            miseÀJourBateaux(true);
         }
     }
 
@@ -293,13 +295,13 @@ public class Plateau extends Objet {
                 int collision = collisionne(Ressources.pointeurSurvol, Dir.NORD, 1, -1);
                 if (collision != -1 && collision != N_BATEAUX){
                     bateauSélec = collision;
-                    miseÀJourBateaux();
+                    miseÀJourBateaux(true);
                 }
             } else {
                 if(collisionne(bateauxPos[bateauSélec], bateauxDir[bateauSélec], bateauxLong[bateauSélec], bateauSélec) == -1){
                     bateauSélec = -1;
                 }
-                miseÀJourBateaux();
+                miseÀJourBateaux(true);
             }
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
             if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
@@ -365,11 +367,16 @@ public class Plateau extends Objet {
         }else{
             pine = pineRouge.copier();
         }
-        // pinesPos.add(pos);
         pine.donnerTransformée(new Transformée().positionner(new Vec3((float)Math.floorMod(pos,10)/10f+0.05f, 0f, (float)(pos/10)/10f+0.05f)).échelonner(new Vec3(1f/600f)));
         pine.avoirTransformée().parenter(plateau.avoirTransformée());
-        // pines.add(pine);
         Ressources.scèneActuelle.ajouterObjet(pine);
+        GestionnaireAnimations.ajouterAnimation(
+            "pineFrappe", 
+            pine.avoirTransformée(), 
+            pine.avoirTransformée().copier().translation(new Vec3(0,0.2f,0f)).animClé(),
+            pine.avoirTransformée().animClé(), 
+            1000,
+            Interpolation.ACCÉLÉRER);
 
         return res;
     }
@@ -390,59 +397,85 @@ public class Plateau extends Objet {
                     bateauxDir[bateauSélec] = Dir.SUD;
                     break;
             }
-            miseÀJourBateaux();
+            miseÀJourBateaux(true);
         }
     }
 
-    private void miseÀJourBateaux(){
+    private void miseÀJourBateaux(boolean animer){
         for (int i = 0; i < N_BATEAUX; i++){
             if(bateaux[i] == null){
                 continue;
             }
+            Transformée transforméeB = null;
             switch (bateauxDir[i]) {
                 case NORD:
-                    bateaux[i].avoirTransformée().faireRotation(new Vec3(0,0,0));
+                    transforméeB = bateaux[i].avoirTransformée().copier().faireRotation(new Vec3(0,0,0));
                     break;
                 case SUD:
-                    bateaux[i].avoirTransformée().faireRotation(new Vec3(0,(float)Math.PI,0));
+                    transforméeB = bateaux[i].avoirTransformée().copier().faireRotation(new Vec3(0,(float)Math.PI,0));
                     break;
                 case EST:
-                    bateaux[i].avoirTransformée().faireRotation(new Vec3(0,(float)Math.PI/2f,0));
+                    transforméeB = bateaux[i].avoirTransformée().copier().faireRotation(new Vec3(0,(float)Math.PI/2f,0));
                     break;
                 case OUEST:
-                    bateaux[i].avoirTransformée().faireRotation(new Vec3(0,3f*(float)Math.PI/2f,0));
+                    transforméeB = bateaux[i].avoirTransformée().copier().faireRotation(new Vec3(0,3f*(float)Math.PI/2f,0));
                     break;
             }
             
             int x = Math.floorMod(bateauxPos[i],10);
             int y = bateauxPos[i]/10;
             if (Math.floorMod(bateauxLong[i],2) == 1){
-                bateaux[i].avoirTransformée().positionner(new Vec3(60f*x-(5f*60f) + 30f, i==bateauSélec?60f:0f ,60f*y-(5f*60f) + 30f));
+                transforméeB.positionner(new Vec3(60f*x-(5f*60f) + 30f, i==bateauSélec?60f:0f ,60f*y-(5f*60f) + 30f));
             }else {
                 switch (bateauxDir[i]) {
                     case NORD:
-                        bateaux[i].avoirTransformée().positionner( new Vec3( 60f*x-(5f*60f) + 30f, i==bateauSélec?60f:0f ,60f*y-(5f*60f) ) );
+                        transforméeB.positionner( new Vec3( 60f*x-(5f*60f) + 30f, i==bateauSélec?60f:0f ,60f*y-(5f*60f) ) );
                         break;
                     case SUD:
-                        bateaux[i].avoirTransformée().positionner(new Vec3( 60f*x-(5f*60f) + 30f,i==bateauSélec?60f:0f,60f*y-(5f*60f)+60f ));
+                        transforméeB.positionner(new Vec3( 60f*x-(5f*60f) + 30f,i==bateauSélec?60f:0f,60f*y-(5f*60f)+60f ));
                         break;
                     case EST:
-                        bateaux[i].avoirTransformée().positionner(new Vec3( 60f*x-(5f*60f),i==bateauSélec?60f:0f,60f*y-(5f*60f) + 30f ));
+                        transforméeB.positionner(new Vec3( 60f*x-(5f*60f),i==bateauSélec?60f:0f,60f*y-(5f*60f) + 30f ));
                         break;
                     case OUEST:
-                        bateaux[i].avoirTransformée().positionner(new Vec3( 60f*x-(5f*60f)+60f,i==bateauSélec?60f:0f,60f*y-(5f*60f) + 30f ));
+                        transforméeB.positionner(new Vec3( 60f*x-(5f*60f)+60f,i==bateauSélec?60f:0f,60f*y-(5f*60f) + 30f ));
                         break;
                 }
+            }
+
+            if (animer){
+                GestionnaireAnimations.ajouterAnimation(
+                    "MouvementBateaux", 
+                    bateaux[i].avoirTransformée(), 
+                    bateaux[i].avoirTransformée().animClé(), 
+                    transforméeB.animClé(), 
+                    100,
+                    Interpolation.RALENTIR);
+            } else {
+                bateaux[i].donnerTransformée(transforméeB);
             }
         }
     }
 
     public void transitionnerÀBatailleTourA() {
-        radar.avoirTransformée().faireRotation(new Vec3(45f*((float)Math.PI/180f),0f,0f));
+        //radar.avoirTransformée().faireRotation(new Vec3(45f*((float)Math.PI/180f),0f,0f));
+        GestionnaireAnimations.ajouterAnimation(
+            "radarUp", 
+            radar.avoirTransformée(), 
+            radar.avoirTransformée().animClé(), 
+            radar.avoirTransformée().faireRotation(new Vec3(45f*((float)Math.PI/180f),0f,0f)).animClé(),
+            1000,
+            Interpolation.SMOOTHSTEP);
     }
 
     public void transitionnerÀBatailleTourB() {
-        radar.avoirTransformée().faireRotation(new Vec3(0f));
+        GestionnaireAnimations.ajouterAnimation(
+            "radarUp", 
+            radar.avoirTransformée(), 
+            radar.avoirTransformée().animClé(), 
+            radar.avoirTransformée().faireRotation(new Vec3(0f)).animClé(),
+            1000,
+            Interpolation.SMOOTHSTEP);
     }
     
 }

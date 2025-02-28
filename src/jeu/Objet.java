@@ -2,13 +2,14 @@ package jeu;
 
 import java.util.ArrayList;
 
+import animations.Animable;
 import graphiques.Maillage;
 import graphiques.Nuanceur;
 import graphiques.Texture;
 import maths.Transformée;
 import maths.Vec4;
 
-public class Objet {
+public class Objet implements Animable{
     public int ID;
     public String nom;
     public boolean dessiner = true;
@@ -86,6 +87,43 @@ public class Objet {
         Objet o = new Objet(nom, maillage, nuanceur, couleur, texture, transformée!=null?transformée.copier():null);
         o.dessiner = dessiner;
         return o;
+    }
+
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {}
+
+    @Override
+    public Object[] animClé() {
+        Object[] res = new Object[]{
+            dessiner,
+            maillage,
+            nuanceur,
+            texture,
+            transformée
+        };
+        return res;
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        if(c.length != 5 ||
+        !(c[0] instanceof Boolean)||
+        !(c[1] instanceof Maillage)||
+        !(c[2] instanceof Nuanceur)||
+        !(c[3] instanceof Texture)||
+        !(c[4] instanceof Transformée)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        this.dessiner = (Boolean)cléB[0];
+        this.maillage = (Maillage)cléB[1];
+        this.nuanceur = (Nuanceur)cléB[2];
+        this.texture = (Texture)cléB[3];
+        this.transformée = (Transformée)cléB[4];
     }
 
 }

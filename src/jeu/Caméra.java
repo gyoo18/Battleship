@@ -1,11 +1,12 @@
 package jeu;
 
+import animations.Animable;
 import maths.Mat4;
 import maths.Transformée;
 import maths.Vec3;
 import utils.Ressources;
 
-public class Caméra {
+public class Caméra implements Animable {
     
     public float FOV = 50f;
     public float planProche = 0.01f;
@@ -51,17 +52,37 @@ public class Caméra {
         projection = Mat4.fairePerspective(planProche, planLoin, FOV, ratio);
     }
 
-    public void positionner   (Vec3 pos) { vue.positionner  ( pos.opposé() ); }
-    public void faireRotation (Vec3 rot) { vue.faireRotation( rot.opposé() ); }
-    public void faireÉchelle  (Vec3 éch) { vue.faireÉchelle ( éch.inv()    ); }
+    public Caméra positionner   (Vec3 pos) { vue.positionner  ( pos.opposé() ); return this; }
+    public Caméra faireRotation (Vec3 rot) { vue.faireRotation( rot.opposé() ); return this; }
+    public Caméra faireÉchelle  (Vec3 éch) { vue.faireÉchelle ( éch.inv()    ); return this; }
 
-    public void translation (Vec3 pos) { vue.translation ( pos.opposé() ); }
-    public void tourner     (Vec3 rot) { vue.tourner     ( rot.opposé() ); }
-    public void échelonner  (Vec3 éch) { vue.échelonner  ( éch.inv()    ); }
+    public Caméra translation (Vec3 pos) { vue.translation ( pos.opposé() ); return this; }
+    public Caméra tourner     (Vec3 rot) { vue.tourner     ( rot.opposé() ); return this; }
+    public Caméra échelonner  (Vec3 éch) { vue.échelonner  ( éch.inv()    ); return this; }
 
     public Vec3 avoirPos () { return vue.avoirPos().opposé(); }
     public Vec3 avoirRot () { return vue.avoirRot().opposé(); }
     public Vec3 avoirÉch () { return vue.avoirÉch().inv(); }
 
     public Transformée avoirVue() {return vue;}
+
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {
+        vue.mix(a,b,m);
+    }
+
+    @Override
+    public Object[] animClé() {
+        return vue.animClé();
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        return vue.validerClé(c);
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        vue.terminerAnimation(cléB);
+    }
 }

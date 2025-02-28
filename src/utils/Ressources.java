@@ -1,8 +1,12 @@
 package utils;
 
+import animations.FonctionFinAnimation;
+import animations.GestionnaireAnimations;
+import animations.GestionnaireAnimations.Interpolation;
 import jeu.Plateau;
 import jeu.Scène;
 import maths.Mat4;
+import maths.Transformée;
 import maths.Vec3;
 
 public class Ressources {
@@ -35,7 +39,13 @@ public class Ressources {
             Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
             Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourA();
-            scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f)));
+            GestionnaireAnimations.ajouterAnimation(
+                "->A",
+                scèneActuelle.caméra.avoirVue(), 
+                scèneActuelle.caméra.avoirVue().animClé(),
+                scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f))).avoirVue().animClé(), 
+                1000,
+                Interpolation.RALENTIR);
         }
     }
     public static void transitionnerÀBatailleTourB(){
@@ -43,7 +53,19 @@ public class Ressources {
             Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
             Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourB();
-            scèneActuelle.caméra.avoirVue().positionner(new Vec3(0f));
+            GestionnaireAnimations.ajouterAnimation(
+                "->B",
+                scèneActuelle.caméra.avoirVue(), 
+                scèneActuelle.caméra.avoirVue().animClé(),
+                scèneActuelle.caméra.positionner(new Vec3(0f)).avoirVue().animClé(), 
+                1000,
+                Interpolation.SMOOTHSTEP,
+                new FonctionFinAnimation() {
+                    @Override
+                    public void appeler() {
+                        ((Plateau)scèneActuelle.obtenirObjet("Plateau Adverse")).tirerAléatoire(plateau);
+                    }
+                });
         }
     }
 

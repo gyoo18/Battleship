@@ -1,8 +1,11 @@
 package maths;
+
+import animations.Animable;
+
 /**
  * Vecteur de 3 dimension à coordonées cartésiennes (x,y,z)
  */
-public class Vec3 {
+public class Vec3 implements Animable {
     public float x;
     public float y;
     public float z;
@@ -282,6 +285,33 @@ public class Vec3 {
      */
     public Vec3 inv(){
         return new Vec3(1f/x,1f/y,1f/z);
+    }
+    
+    @Override
+    public void mix(Object[] a, Object[] b, float m) {
+        x = (float)a[0]*(1f-m) + (float)b[0]*m;
+        y = (float)a[1]*(1f-m) + (float)b[2]*m;
+        z = (float)a[2]*(1f-m) + (float)b[2]*m;
+    }
+
+    @Override
+    public Object[] animClé() {
+        return new Object[]{x,y,z};
+    }
+
+    @Override
+    public boolean validerClé(Object[] c) {
+        if (c.length != 3 || !(c[0] instanceof Float) || !(c[1] instanceof Float) || !(c[2] instanceof Float)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void terminerAnimation(Object[] cléB) {
+        x = (float)cléB[0];
+        y = (float)cléB[1];
+        z = (float)cléB[2];
     }
 
 }

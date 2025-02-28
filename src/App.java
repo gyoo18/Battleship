@@ -1,6 +1,7 @@
 import animations.GestionnaireAnimations;
 import contrôles.GestionnaireContrôles;
 import graphiques.Fenêtre;
+import graphiques.GénérateurMaillage;
 import graphiques.Maillage;
 import graphiques.Nuanceur;
 import graphiques.Peintre;
@@ -33,6 +34,19 @@ public class App {
 
         plateau.placerBateauxAléatoirement();
         plateauAdverse.placerBateauxAléatoirement();
+
+        Maillage océanM = GénérateurMaillage.générerGrille(1000, 1000);
+        Nuanceur nuaOcéan = Chargeur.chargerNuanceurFichier("assets/nuanceurs/océan");
+        nuaOcéan.étiquettes.add("temps");
+        Objet océan = new Objet(
+            "Océan",
+            océanM,
+            nuaOcéan,
+            new Vec4(9f/255f, 16f/255f, 65f/255f,1f),
+            null,
+            new Transformée().échelonner(new Vec3(10000f)).positionner(new Vec3(-5000f,-10f,-5000f))
+        );
+        scène.ajouterObjet(océan);
 
         scène.caméra.avoirVue().estOrbite = true;
         scène.caméra.avoirVue().donnerRayon(700);

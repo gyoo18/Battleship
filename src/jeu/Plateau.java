@@ -375,7 +375,7 @@ public class Plateau extends Objet {
             pine.avoirTransformée(), 
             pine.avoirTransformée().copier().translation(new Vec3(0,0.2f,0f)).animClé(),
             pine.avoirTransformée().animClé(), 
-            1000,
+            100,
             Interpolation.ACCÉLÉRER);
 
         return res;

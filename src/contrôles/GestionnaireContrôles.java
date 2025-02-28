@@ -24,13 +24,11 @@ public class GestionnaireContrôles {
     private static Caméra caméra;
     private static Scène scène;
 
-    private static Objet pointeur;
     private static Plateau plateau;
 
     public static void initialiser(Fenêtre fenêtre){
         caméra = fenêtre.scène.caméra;
         scène = fenêtre.scène;
-        pointeur = fenêtre.scène.obtenirObjet("pointeur");
         plateau = (Plateau)fenêtre.scène.obtenirObjet("Plateau");
     }
 

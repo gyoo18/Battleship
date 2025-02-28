@@ -31,8 +31,17 @@ public class Texture {
         this.hauteur = hauteur;
     }
 
+    public void faireHDR(){
+        dataType = GL46.GL_FLOAT;
+    }
+
     public void construire(){
-        ByteBuffer bb = ByteBuffer.allocateDirect(pixels.length*Byte.BYTES).order(ByteOrder.nativeOrder()).put(pixels).position(0);
+        ByteBuffer bb;
+        if (pixels == null){
+            bb = ByteBuffer.allocateDirect(largeur*hauteur*Byte.BYTES).order(ByteOrder.nativeOrder()).position(0);
+        }else{ 
+            bb = ByteBuffer.allocateDirect(pixels.length*Byte.BYTES).order(ByteOrder.nativeOrder()).put(pixels).position(0);
+        }
         ID = GL46.glGenTextures();
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, ID);
         GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, internalFormat, largeur, hauteur, 0, format, dataType, bb);

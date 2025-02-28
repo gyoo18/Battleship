@@ -18,19 +18,13 @@ public class App {
     public static void main(String[] args) throws Exception {
         Fenêtre fenêtre = new Fenêtre();
         Peintre peintre = new Peintre();
-        
-        
-        Nuanceur nuanceur2 = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaColoré");
-        Maillage mCube = Chargeur.chargerOBJ("assets/maillages/cube.obj");
+
         Plateau plateau = new Plateau("Plateau");
         Plateau plateauAdverse = new Plateau("Plateau Adverse");
-        Objet pointeur = new Objet("pointeur", mCube, nuanceur2, new Vec4(1f,1f,1f,1f), null, new Transformée().échelonner(new Vec3(10)).tourner(new Vec3(0,(float)Math.PI/2,0)));
         Scène scène = new Scène();
         Ressources.scèneActuelle = scène;
         plateau.ajouterObjets(scène);
-        scène.ajouterObjet(plateauAdverse);
         plateauAdverse.ajouterObjets(scène);
-        scène.ajouterObjet(pointeur);
 
         plateau.placerBateauxAléatoirement();
         plateauAdverse.placerBateauxAléatoirement();

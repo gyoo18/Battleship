@@ -106,7 +106,7 @@ public class Plateau extends Objet {
             croiseur.avoirTransformée().parenter(avoirTransformée());
 
             Maillage destroyerM = Chargeur.chargerOBJ("assets/maillages/Destroyer.obj");
-            Texture destroyerTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
+            Texture destroyerTx = Chargeur.chargerTexture("assets/textures/Destroyer.png");
             Objet destroyer = new Objet("Destroyer",destroyerM,nuanceur,null,destroyerTx,new Transformée());
             bateaux[2] = destroyer;
             bateauxDir[2] = Dir.NORD;
@@ -119,7 +119,7 @@ public class Plateau extends Objet {
             bateauxPos[3] = 23;
 
             Maillage torpilleurM = Chargeur.chargerOBJ("assets/maillages/Torpilleur.obj");
-            Texture torpilleurTx = Chargeur.chargerTexture("assets/textures/Croiseur.png");
+            Texture torpilleurTx = Chargeur.chargerTexture("assets/textures/Torpilleur.png");
             Objet torpilleur = new Objet("Torpilleur",torpilleurM,nuanceur,null,torpilleurTx,new Transformée());
             bateaux[4] = torpilleur;
             bateauxDir[4] = Dir.NORD;

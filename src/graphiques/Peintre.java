@@ -96,6 +96,10 @@ public class Peintre {
 						GL46.glUniform1i(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "posPlateau"),-1);
 					}
 
+					if (o.avoirNuanceur().étiquettes.contains("GUI")){
+						GL46.glUniform1f(GL46.glGetUniformLocation(o.avoirNuanceur().ID, "ratio"),Ressources.ratioFenêtre);
+					}
+
 					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"vue"),false,scène.caméra.avoirVue().avoirMat().mat);
 					GL46.glUniformMatrix4fv(GL46.glGetUniformLocation(o.avoirNuanceur().ID,"projection"),false,scène.caméra.projection.mat);
 

@@ -30,6 +30,7 @@ public class GestionnaireContrôles {
         caméra = fenêtre.scène.caméra;
         scène = fenêtre.scène;
         plateau = (Plateau)fenêtre.scène.obtenirObjet("Plateau");
+        caméraRotation = new Vec2(caméra.avoirRot().y*1000f/(float)Math.PI,caméra.avoirRot().x*1000f/(float)Math.PI);
     }
 
     //cspell:ignore codescan
@@ -45,6 +46,7 @@ public class GestionnaireContrôles {
             case GLFW.GLFW_KEY_SPACE:
                 if (action == GLFW.GLFW_PRESS && !ESPACE_PRESSÉ){
                     ESPACE_PRESSÉ = true;
+                    Ressources.scèneActuelle.obtenirObjet("Texte Coulé").dessiner = false;
                     switch (Ressources.étatJeu) {
                         case POSITIONNEMENT:
                             Ressources.transitionnerÀBatailleTourA();
@@ -107,6 +109,9 @@ public class GestionnaireContrôles {
             caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / ((float)yoffset + 0.05f));
         }else{
             caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() * ((float)-yoffset + 0.05f));
+        }
+        if(caméra.avoirVue().avoirRayon() > 2000f){
+            caméra.avoirVue().donnerRayon(2000f);
         }
     }
 

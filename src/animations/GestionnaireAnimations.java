@@ -21,10 +21,11 @@ public class GestionnaireAnimations {
     private static ArrayList<Interpolation> interpolations = new ArrayList<>();
     private static ArrayList<String> noms = new ArrayList<>();
     private static ArrayList<FonctionFinAnimation> fonctionFinAnimations = new ArrayList<>();
+    private static ArrayList<Boolean> supplantables = new ArrayList<>();
 
     private static long tempsPrécédent = 0;
 
-    public static void ajouterAnimation(String nom, Animable objet, Object[] cléA, Object[] cléB, int duréeMillis, Interpolation interpolation, FonctionFinAnimation fonctionFinAnimation){
+    public static void ajouterAnimation(String nom, Animable objet, Object[] cléA, Object[] cléB, int duréeMillis, Interpolation interpolation, FonctionFinAnimation fonctionFinAnimation, boolean supplantable){
         if(!objet.validerClé(cléA) || !objet.validerClé(cléB)){
             System.err.println("GestionnaireAnimations.ajouterAnimation [Erreur] : les clés fournies ne sont pas valides");
         }
@@ -33,6 +34,10 @@ public class GestionnaireAnimations {
         }
         if (animables.contains(objet)){
             int i = animables.indexOf(objet);
+            if(!supplantables.get(i)){
+                return;
+            }
+            if(fonctionFinAnimations.get(i) != null){fonctionFinAnimations.get(i).appeler();}
             noms.set(i,nom);
             clésA.set(i,cléA);
             clésB.set(i,cléB);
@@ -40,6 +45,7 @@ public class GestionnaireAnimations {
             tempsÉcoulé.set(i,0);
             interpolations.set(i,interpolation);
             fonctionFinAnimations.set(i,fonctionFinAnimation);
+            supplantables.set(i, supplantable);
         }else{
             noms.add(nom);
             animables.add(objet);
@@ -49,11 +55,12 @@ public class GestionnaireAnimations {
             tempsÉcoulé.add(0);
             interpolations.add(interpolation);
             fonctionFinAnimations.add(fonctionFinAnimation);
+            supplantables.add(supplantable);
         }
     }
 
-    public static void ajouterAnimation(String nom, Animable objet, Object[] cléA, Object[] cléB, int duréeMillis, Interpolation interpolation){
-        ajouterAnimation(nom, objet, cléA, cléB, duréeMillis, interpolation, null);
+    public static void ajouterAnimation(String nom, Animable objet, Object[] cléA, Object[] cléB, int duréeMillis, Interpolation interpolation, boolean supplantable){
+        ajouterAnimation(nom, objet, cléA, cléB, duréeMillis, interpolation, null,supplantable);
     }
 
     public static void mettreÀJourAnimations(){
@@ -75,6 +82,7 @@ public class GestionnaireAnimations {
                 tempsÉcoulé.remove(i);
                 interpolations.remove(i);
                 fonctionFinAnimations.remove(i);
+                supplantables.remove(i);
                 break;
             }
 

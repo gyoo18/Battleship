@@ -42,8 +42,25 @@ public class App {
         );
         scène.ajouterObjet(océan);
 
+        Maillage texteGagnéM = Chargeur.chargerOBJ("assets/maillages/texte_gagné.obj");
+        Nuanceur nuaTexte = Chargeur.chargerNuanceurFichier("assets/nuanceurs/nuaTexte");
+        nuaTexte.étiquettes.add("GUI");
+        Objet texteGagné = new Objet("Texte Gagné", texteGagnéM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
+        texteGagné.dessiner = false;
+
+        Maillage textePerdusM = Chargeur.chargerOBJ("assets/maillages/texte_perdus.obj");
+        Objet textePerdus = new Objet("Texte Perdus", textePerdusM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
+        textePerdus.dessiner = false;
+
+        Maillage texteCouléM = Chargeur.chargerOBJ("assets/maillages/texte_coulé.obj");
+        Objet texteCoulé = new Objet("Texte Coulé", texteCouléM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
+        texteCoulé.dessiner = false;
+        scène.ajouterObjet(texteCoulé);
+        scène.ajouterObjet(textePerdus);
+        scène.ajouterObjet(texteCoulé);
+
         scène.caméra.avoirVue().estOrbite = true;
-        scène.caméra.avoirVue().donnerRayon(700);
+        scène.caméra.avoirVue().donnerRayon(1000).faireRotation(new Vec3(30f*(float)Math.PI/180f,0f,0f));
         scène.caméra.planProche = 10f;
         scène.caméra.planLoin = 5000f;
         scène.caméra.surFenêtreModifiée();
@@ -59,12 +76,6 @@ public class App {
         while (fenêtre.actif){
             GestionnaireAnimations.mettreÀJourAnimations();
             fenêtre.mettreÀJour();
-            if(Ressources.étatJeu == ÉtatJeu.A_GAGNÉ){
-                System.out.println("Vous avez gagné!");
-            }
-            if(Ressources.étatJeu == ÉtatJeu.B_GAGNÉ){
-                System.out.println("Vous avez perdus!");
-            }
         }
     }
 }

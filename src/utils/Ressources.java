@@ -36,7 +36,6 @@ public class Ressources {
 
     public static void transitionnerÀBatailleTourA(){
         if(étatJeu != ÉtatJeu.B_GAGNÉ && étatJeu != ÉtatJeu.A_GAGNÉ){
-            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
             Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourA();
             GestionnaireAnimations.ajouterAnimation(
@@ -45,12 +44,18 @@ public class Ressources {
                 scèneActuelle.caméra.avoirVue().animClé(),
                 scèneActuelle.caméra.positionner(Mat4.mulV(plateau.radar.avoirTransformée().avoirMat(), new Vec3(0.5f,0,0.5f))).avoirVue().animClé(), 
                 1000,
-                Interpolation.RALENTIR);
+                Interpolation.RALENTIR,
+                new FonctionFinAnimation(){
+                    @Override
+                    public void appeler(){
+                        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_A;
+                    }
+                },
+                false);
         }
     }
     public static void transitionnerÀBatailleTourB(){
         if(étatJeu != ÉtatJeu.B_GAGNÉ && étatJeu != ÉtatJeu.A_GAGNÉ){
-            Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
             Plateau plateau = (Plateau)scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourB();
             GestionnaireAnimations.ajouterAnimation(
@@ -63,18 +68,26 @@ public class Ressources {
                 new FonctionFinAnimation() {
                     @Override
                     public void appeler() {
+                        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
                         ((Plateau)scèneActuelle.obtenirObjet("Plateau Adverse")).tirerAléatoire(plateau);
                     }
-                });
+                },
+                false);
         }
     }
 
     public static void annoncerGagnant(){
         if (étatJeu == ÉtatJeu.BATAILLE_TOUR_A){
             étatJeu = ÉtatJeu.A_GAGNÉ;
+            scèneActuelle.obtenirObjet("Texte Gagné").dessiner = true;
         }
         if (étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
             étatJeu = ÉtatJeu.B_GAGNÉ;
+            scèneActuelle.obtenirObjet("Texte Perdus").dessiner = true;
         }
+    }
+
+    public static void annoncerCoulé(){
+        scèneActuelle.obtenirObjet("Texte Coulé").dessiner = true;
     }
 }

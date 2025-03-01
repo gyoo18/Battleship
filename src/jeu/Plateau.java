@@ -16,7 +16,6 @@ import maths.Vec3;
 import maths.Vec4;
 import utils.Chargeur;
 import utils.Ressources;
-import utils.Ressources.ÉtatJeu;
 
 public class Plateau extends Objet {
 
@@ -346,6 +345,7 @@ public class Plateau extends Objet {
             if(bateauxTouchés[collision] == bateauxLong[collision]){
                 bateauxCoulés[collision] = true;
                 res = TirRes.COULÉ;
+                Ressources.annoncerCoulé();
 
                 boolean perdus = true;
                 for (int i = 0; i < N_BATEAUX; i++){
@@ -376,7 +376,8 @@ public class Plateau extends Objet {
             pine.avoirTransformée().copier().translation(new Vec3(0,0.2f,0f)).animClé(),
             pine.avoirTransformée().animClé(), 
             100,
-            Interpolation.ACCÉLÉRER);
+            Interpolation.ACCÉLÉRER,
+            true);
 
         return res;
     }
@@ -450,7 +451,8 @@ public class Plateau extends Objet {
                     bateaux[i].avoirTransformée().animClé(), 
                     transforméeB.animClé(), 
                     100,
-                    Interpolation.RALENTIR);
+                    Interpolation.RALENTIR,
+                    true);
             } else {
                 bateaux[i].donnerTransformée(transforméeB);
             }
@@ -465,17 +467,19 @@ public class Plateau extends Objet {
             radar.avoirTransformée().animClé(), 
             radar.avoirTransformée().faireRotation(new Vec3(45f*((float)Math.PI/180f),0f,0f)).animClé(),
             1000,
-            Interpolation.SMOOTHSTEP);
+            Interpolation.SMOOTHSTEP,
+            false);
     }
 
     public void transitionnerÀBatailleTourB() {
         GestionnaireAnimations.ajouterAnimation(
-            "radarUp", 
+            "radarDown", 
             radar.avoirTransformée(), 
             radar.avoirTransformée().animClé(), 
             radar.avoirTransformée().faireRotation(new Vec3(0f)).animClé(),
             1000,
-            Interpolation.SMOOTHSTEP);
+            Interpolation.SMOOTHSTEP,
+            false);
     }
     
 }

@@ -9,6 +9,8 @@
         "Framebuffer",
         "glfw",
         "GLFW",
-        "Octarbre"
+        "Octarbre",
+        "supplantable",
+        "supplantables"
     ]
 }

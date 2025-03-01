@@ -2,13 +2,12 @@ package contrôles;
 
 import org.lwjgl.glfw.GLFW;
 
+import Réseau.Communication;
 import graphiques.Fenêtre;
 import jeu.Caméra;
-import jeu.Objet;
 import jeu.Plateau;
 import jeu.Scène;
 import maths.Mat4;
-import maths.Maths;
 import maths.Vec2;
 import maths.Vec3;
 import utils.Ressources;
@@ -49,12 +48,13 @@ public class GestionnaireContrôles {
                     Ressources.scèneActuelle.obtenirObjet("Texte Coulé").dessiner = false;
                     switch (Ressources.étatJeu) {
                         case POSITIONNEMENT:
-                            Ressources.transitionnerÀBatailleTourA();
+                            Ressources.étatJeu = ÉtatJeu.ATTENTE_POSITIONNEMENT_ADVERSAIRE;
+                            Communication.indiquerPlacementTerminé();
                             break;
                         case BATAILLE_TOUR_A:
                             //Ressources.transitionnerÀBatailleTourB();
                             break;
-                        case BATAILLE_TOUR_B:
+                        case BATAILLE_TOUR_B_JOUÉ:
                             Ressources.transitionnerÀBatailleTourA();
                             break;
                     }

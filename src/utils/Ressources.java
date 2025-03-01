@@ -1,5 +1,6 @@
 package utils;
 
+import Réseau.Communication;
 import animations.FonctionFinAnimation;
 import animations.GestionnaireAnimations;
 import animations.GestionnaireAnimations.Interpolation;
@@ -13,8 +14,10 @@ public class Ressources {
 
     public enum ÉtatJeu{
         POSITIONNEMENT,
+        ATTENTE_POSITIONNEMENT_ADVERSAIRE,
         BATAILLE_TOUR_A,
-        BATAILLE_TOUR_B,
+        BATAILLE_ATTENTE_TOUR_B,
+        BATAILLE_TOUR_B_JOUÉ,
         B_GAGNÉ,
         A_GAGNÉ
     }
@@ -68,8 +71,8 @@ public class Ressources {
                 new FonctionFinAnimation() {
                     @Override
                     public void appeler() {
-                        Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B;
-                        ((Plateau)scèneActuelle.obtenirObjet("Plateau Adverse")).tirerAléatoire(plateau);
+                        Ressources.étatJeu = ÉtatJeu.BATAILLE_ATTENTE_TOUR_B;
+                        Communication.attendreCoup();
                     }
                 },
                 false);
@@ -80,10 +83,12 @@ public class Ressources {
         if (étatJeu == ÉtatJeu.BATAILLE_TOUR_A){
             étatJeu = ÉtatJeu.A_GAGNÉ;
             scèneActuelle.obtenirObjet("Texte Gagné").dessiner = true;
+            scèneActuelle.obtenirObjet("Texte Coulé").dessiner = false;
         }
-        if (étatJeu == ÉtatJeu.BATAILLE_TOUR_B){
+        if (étatJeu == ÉtatJeu.BATAILLE_ATTENTE_TOUR_B){
             étatJeu = ÉtatJeu.B_GAGNÉ;
             scèneActuelle.obtenirObjet("Texte Perdus").dessiner = true;
+            scèneActuelle.obtenirObjet("Texte Coulé").dessiner = false;
         }
     }
 

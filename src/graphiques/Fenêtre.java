@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 
+import Réseau.Communication;
 import contrôles.GestionnaireContrôles;
 import jeu.Scène;
 import utils.Ressources;
@@ -17,8 +18,8 @@ public class Fenêtre {
     public boolean actif = true;
     private Peintre peintre;
 
-    public int largeurPixels = 800;
-    public int hauteurPixels = 800;
+    public int largeurPixels = 600;
+    public int hauteurPixels = 600;
 
     public Scène scène;
 
@@ -123,6 +124,9 @@ public class Fenêtre {
 
     public void mettreÀJour(){
         if (GLFW.glfwWindowShouldClose(glfwFenêtre)){
+            actif = false;
+            Communication.couperCommunication();
+        } else if(Communication.communicationsCoupés()){
             actif = false;
         }
         

@@ -2,6 +2,7 @@ package jeu;
 
 import java.util.ArrayList;
 
+import Réseau.Communication;
 import animations.GestionnaireAnimations;
 import animations.GestionnaireAnimations.Interpolation;
 //cspell:ignore énérateur Sélec
@@ -305,6 +306,7 @@ public class Plateau extends Objet {
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
             if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
                 tirer(((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")),Ressources.pointeurSurvol);
+                Communication.envoyerCoup(Ressources.pointeurSurvol);
                 Ressources.transitionnerÀBatailleTourB();
             }
         }
@@ -480,6 +482,31 @@ public class Plateau extends Objet {
             1000,
             Interpolation.SMOOTHSTEP,
             false);
+    }
+
+    /*
+     * Dir[N_BATEAUX] bateauxDir  -> 1b/bateau
+     * int[N_BATEAUX] bateauxPos  -> 1b/bateau (0-100 < 0-255)
+     * [dir,dir,dir,...,long,long,...,pos,pos,pos,...]
+     */
+    public byte[] enByteListe(){
+        byte[] plateau = new byte[2*N_BATEAUX];
+        for (int i = 0; i < N_BATEAUX; i++){
+            plateau[i] = (byte)bateauxDir[i].ordinal();
+        }
+        for (int i = 0; i < N_BATEAUX; i++){
+            plateau[i+N_BATEAUX] = (byte)bateauxPos[i];
+        }
+        return plateau;
+    }
+
+    public void lireBytes(byte[] plateau){
+        for (int i = 0; i < N_BATEAUX; i++){
+            bateauxDir[i] = Dir.values()[plateau[i]];
+        }
+        for (int i = 0; i < N_BATEAUX; i++){
+            bateauxPos[i] = (int)plateau[i+N_BATEAUX];
+        }
     }
     
 }

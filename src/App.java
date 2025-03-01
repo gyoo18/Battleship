@@ -1,3 +1,4 @@
+import Réseau.Communication;
 import animations.GestionnaireAnimations;
 import contrôles.GestionnaireContrôles;
 import graphiques.Fenêtre;
@@ -16,6 +17,8 @@ import utils.Ressources;
 import utils.Ressources.ÉtatJeu;
 public class App {
     public static void main(String[] args) throws Exception {
+        Communication.Connecter();
+        Communication.attendrePlacementTerminé();
         Fenêtre fenêtre = new Fenêtre();
         Peintre peintre = new Peintre();
 
@@ -55,7 +58,7 @@ public class App {
         Maillage texteCouléM = Chargeur.chargerOBJ("assets/maillages/texte_coulé.obj");
         Objet texteCoulé = new Objet("Texte Coulé", texteCouléM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
         texteCoulé.dessiner = false;
-        scène.ajouterObjet(texteCoulé);
+        scène.ajouterObjet(texteGagné);
         scène.ajouterObjet(textePerdus);
         scène.ajouterObjet(texteCoulé);
 
@@ -73,9 +76,35 @@ public class App {
 
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
+        boolean prêtÀJouer = false;
         while (fenêtre.actif){
             GestionnaireAnimations.mettreÀJourAnimations();
             fenêtre.mettreÀJour();
+            if(!prêtÀJouer && Ressources.étatJeu != ÉtatJeu.POSITIONNEMENT){
+                if( Communication.placementOpposantTerminé() ){
+                    prêtÀJouer = true;
+                    byte[] plateauAdverseBytes = null;
+                    if(Communication.estServeur){
+                        Ressources.transitionnerÀBatailleTourA();
+                    }else{
+                        Ressources.transitionnerÀBatailleTourB();
+                    }
+                    Communication.envoyerPlateau(plateau.enByteListe());
+                    Communication.attendrePlateau();
+                    while(plateauAdverseBytes == null){
+                        plateauAdverseBytes = Communication.plateauReçus();
+                    }
+                    plateauAdverse.lireBytes(plateauAdverseBytes);
+                }
+            }
+            if(Ressources.étatJeu == ÉtatJeu.BATAILLE_ATTENTE_TOUR_B){
+                int c = Communication.coupReçus();
+                if(c != -1){
+                    plateauAdverse.tirer(plateau, c);
+                    Communication.attendreCoup();
+                    Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B_JOUÉ;
+                }
+            }
         }
     }
 }

@@ -12,5 +12,6 @@
         "Octarbre",
         "supplantable",
         "supplantables"
-    ]
+    ],
+    "java.dependency.syncWithFolderExplorer": false
 }

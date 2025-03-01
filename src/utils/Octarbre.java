@@ -53,7 +53,7 @@ public class Octarbre<T> {
 
     public void ajouter(T objet, Vec3 position){
         if(!(Math.abs(position.x-this.position.x) < 1.01f*this.taille.x/2 && Math.abs(position.y-this.position.y) < 1.01f*this.taille.y/2 && Math.abs(position.z-this.position.z) < 1.01f*this.taille.z/2)){
-            System.err.println("[Erreur] : Octarbre.ajouter : Impossible d'ajouter un élément qui dépasse les bords de la boîte.");
+            //System.err.println("[Erreur] : Octarbre.ajouter : Impossible d'ajouter un élément qui dépasse les bords de la boîte.");
             return;
         }
         if (enfants == null){

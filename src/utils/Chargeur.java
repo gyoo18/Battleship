@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -27,16 +26,23 @@ public class Chargeur {
     }
 
     public static Nuanceur chargerNuanceurFichier(String cheminSom, String cheminFrag) throws FileNotFoundException{
-        File fichier = new File(cheminSom);
-        Scanner scanner = new Scanner(fichier);
+        Scanner scanner;
+        try{
+            scanner = new Scanner(new File("../"+cheminSom));
+        } catch (FileNotFoundException e){
+            scanner = new Scanner(new File(cheminSom));
+        }
         String somSource = "";
         while(scanner.hasNextLine()){
             somSource += scanner.nextLine()+'\n';
         }
         scanner.close();
 
-        fichier = new File(cheminFrag);
-        scanner = new Scanner(fichier);
+        try{
+            scanner = new Scanner(new File("../"+cheminFrag));
+        } catch (FileNotFoundException e){
+            scanner = new Scanner(new File(cheminFrag));
+        }
         String fragSource = "";
         while(scanner.hasNextLine()){
             fragSource += scanner.nextLine()+'\n';
@@ -51,8 +57,12 @@ public class Chargeur {
         long timer = System.currentTimeMillis();
         long timerTotal = System.currentTimeMillis();
 
-        File fichier = new File(chemin);
-        Scanner scanner = new Scanner(fichier);
+        Scanner scanner;
+        try{
+            scanner = new Scanner(new File("../"+chemin));
+        } catch (FileNotFoundException e){
+            scanner = new Scanner(new File(chemin));
+        }
 
         ArrayList<Float> posLL = new ArrayList<>();
         ArrayList<Float> normLL = new ArrayList<>();
@@ -209,8 +219,12 @@ public class Chargeur {
         long timer = System.currentTimeMillis();
         long timerTotal = System.currentTimeMillis();
 
-        File fichier = new File(chemin);
-        Scanner scanner = new Scanner(fichier);
+        Scanner scanner;
+        try{
+            scanner = new Scanner(new File("../"+chemin));
+        } catch (FileNotFoundException e){
+            scanner = new Scanner(new File(chemin));
+        }
 
         ArrayList<ArrayList<Float>> posLL = new ArrayList<>();
         ArrayList<ArrayList<Float>> normLL = new ArrayList<>();
@@ -385,7 +399,12 @@ public class Chargeur {
     }
 
     public static Texture chargerTexture(String chemin) throws FileNotFoundException, IOException{
-        BufferedImage bi = ImageIO.read(new File(chemin));
+        BufferedImage bi;
+        try{
+            bi = ImageIO.read(new File("../"+chemin));
+        } catch (IOException e){
+            bi = ImageIO.read(new File(chemin));
+        }
         int l = bi.getWidth();
         int h = bi.getHeight();
         int type = bi.getType();

@@ -17,8 +17,6 @@ import utils.Ressources;
 import utils.Ressources.ÉtatJeu;
 public class App {
     public static void main(String[] args) throws Exception {
-        Communication.Connecter();
-        Communication.attendrePlacementTerminé();
         Fenêtre fenêtre = new Fenêtre();
         Peintre peintre = new Peintre();
 
@@ -73,6 +71,9 @@ public class App {
         peintre.lierFenêtre(fenêtre);
         peintre.lierScène(scène);
         GestionnaireContrôles.initialiser(fenêtre);
+
+        Communication.Connecter();
+        Communication.attendrePlacementTerminé();
 
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 

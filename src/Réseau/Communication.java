@@ -130,7 +130,7 @@ public class Communication {
     
     public static void Connecter(){
         try{
-            ip = InetAddress.getLocalHost().toString().split("/")[1];
+            ip = "127.0.0.1"; //InetAddress.getLocalHost().toString().split("/")[1];
             System.out.println("Mon ip : "+ip);
             String[] ipPart = ip.split("\\.");
             ConnexionServeurThread connexionServeurThread = new ConnexionServeurThread();
@@ -150,7 +150,7 @@ public class Communication {
                         System.out.println("L'adresse ne correspond pas à un hôte Battleship.");
                     }
                 }catch(Exception e){
-                    System.out.println("Adresse : "+ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i+" non disponible");
+                    //System.out.println("Adresse : "+ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i+" non disponible");
                 }
                 synchronized(connexionServeurThread){
                     if (connexionServeurThread.estConnecté){
@@ -162,13 +162,16 @@ public class Communication {
                         output = new DataOutputStream(socket.getOutputStream());
                         break;
                     }else{
-                        System.out.println("Toujours aucun client ne s'est connecté.");
+                        //System.out.println("Toujours aucun client ne s'est connecté.");
                     }
                 }
             }
             if(!socket.isConnected()){
                 System.out.println("Aucun hôte trouvé. Création du serveur et attente d'un client.");
-                serversocket = new ServerSocket(5000);
+                synchronized(connexionServeurThread){
+                    serversocket = connexionServeurThread.serverSocket;
+                    connexionServeurThread.interrupt();
+                }
                 System.out.println("Serveur créé à l'adresse :"+serversocket.getInetAddress().toString()+", attente du client...");
                 while (true){
                     socket = serversocket.accept();
@@ -196,15 +199,23 @@ public class Communication {
         try{
             DataInputStream input = new DataInputStream(connection.getInputStream());
             DataOutputStream output = new DataOutputStream(connection.getOutputStream());
+            System.out.println("Envoie de la demande d'authentification.");
+            Thread.sleep(100);
             output.writeUTF("Êtes-vous un hôte Battleship?");
+            System.out.println("Attente de la réponse");
             socket.setSoTimeout(200);
             String réponse = input.readUTF();
             if (!réponse.equals("Oui je suis un hôte Battleship.")){
+                System.out.println("Réponse invalide.");
                 return false;
             }
+            System.out.println("Réponse valide. Envoie de l'identifiant.");
             output.writeLong(ID);
+            System.out.println("Attente de la réponse");
             socket.setSoTimeout(200);
-            return input.readInt()==0;
+            boolean estIdentique = input.readInt()==0;
+            System.out.println(estIdentique?"Réponse valide : le serveur ne correspond pas à soi-même.":"Réponse invalide : le serveur correspond à soi-même.");
+            return estIdentique;
 
         }catch(Exception e){
             e.printStackTrace();
@@ -216,17 +227,23 @@ public class Communication {
         try{
             DataInputStream input = new DataInputStream(connection.getInputStream());
             DataOutputStream output = new DataOutputStream(connection.getOutputStream());
+            System.out.println("Attente de la demande du client.");
             socket.setSoTimeout(200);
             String demande = input.readUTF();
             if (!demande.equals("Êtes-vous un hôte Battleship?")){
+                System.out.println("Demande invalide, le client n'est pas un client Battleship");
                 return false;
             } 
+            System.out.println("Demande valide, envoie de la réponse");
             output.writeUTF("Oui je suis un hôte Battleship.");
+            System.out.println("Attente de l'identifiant.");
             socket.setSoTimeout(200);
             if(input.readLong()==ID){
+                System.out.println("Identifiant invalide : le client est soi-même.");
                 output.writeInt(1);
                 return false;
             } else {
+                System.out.println("Identifiant valide.");
                 output.writeInt(0);
                 return true;
             }
@@ -246,7 +263,7 @@ public class Communication {
     }
 
     public static void attendrePlacementTerminé(){
-        System.out.println("J'attend sa réponse");
+        System.out.println("J'attend que l'adversaire m'informe qu'il a terminé de placer ses pièces");
         synchronized(attenteRéponse){
             attenteRéponse.attendreRéponse(0);
         }
@@ -259,6 +276,7 @@ public class Communication {
                     System.out.println("Communication.placementOpposantTerminé [Erreur] : La réponse n'est pas celle attendue : "+attenteRéponse.réponseString);
                     return false;
                 }
+                System.out.println("L'adversaire a terminé de placer ses pièces");
                 return true;
             }else{
                 //System.out.println("L'adversaire n'a pas répondus");
@@ -296,6 +314,7 @@ public class Communication {
 
     public static void envoyerCoup(int pos){
         try{
+            System.out.println("Envoie du coup à l'adversaire");
             output.writeInt(pos);
         }catch(Exception e){
             e.printStackTrace();
@@ -304,6 +323,7 @@ public class Communication {
 
     public static void attendreCoup(){
         synchronized(attenteRéponse){
+            System.out.println("Attente du coup de l'adversaire");
             attenteRéponse.attendreRéponse(1);
         }
     }
@@ -311,6 +331,7 @@ public class Communication {
     public static int coupReçus(){
         synchronized(attenteRéponse){
             if(attenteRéponse.aRépondus){
+                System.out.println("Reçus un coup de l'adversaire.");
                 return attenteRéponse.réponseInt;
             }else{
                 return -1;

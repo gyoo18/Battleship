@@ -131,7 +131,7 @@ public class Communication {
     public static void Connecter(){
         try{
             ip = InetAddress.getLocalHost().toString().split("/")[1];
-            System.out.println("Mon ip : "+ip);
+            // System.out.println("Mon ip : "+ip);
             String[] ipPart = ip.split("\\.");
             ConnexionServeurThread connexionServeurThread = new ConnexionServeurThread();
             connexionServeurThread.start();

@@ -1,18 +1,38 @@
-## Getting Started
+# Battleship
+Le jeu classique à jouer entre amis, sur votre ordinateur.
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Ceci est ma soumission au défi de février du REI/UQODE
 
-## Folder Structure
+## Comment jouer?
+### Télécharger
+Téléchargez la dernière version dans la section [*Releases*](https://github.com/gyoo18/Battleship/releases) et décompressez le fichier. Dans le dossier bin, exécutez le fichier **Battleship.bat** sur Windows et **Battleship** sur Linux/MacOs.
 
-The workspace contains two folders by default, where:
+### Déroulement du jeu.
+Le jeu ne démarera pas tant qu'il n'aurat pas trouvé un adversaire. Une autre instance du jeu (sur un autre ordinateur ou sur le vôtre) doit être partie et connectée en LAN pour pouvoir commencer la partie.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+Vous serez alors face à un plateau sur lequel figure vos bateaux ainsi qu'un radar. Appuyez sur CTRL et bouger la souris pour orbiter autour du plateau et roulez la molette de souris pour zoomer/dézoomer.
+Cliquez sur vos bateaux pour les déplacer et faites un clique droit pour les tourner de 90°. Lorsque vous aurez terminé de placer vos bateaux, appuyez sur espace pour commencer la partie. La partie débuttera lorsque l'adversaire aura lui aussi appuyé sur espace.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+Lors de votre tour, le radar se relèvera et vous pourrez cliquer dessus pour tirer sur l'ennemi. Une pine blanche apparaîtra alors si vous avez manqué votre cible et une pine rouge apparaîtra si vous avez touché quelque chose. Si vous avez touché toutes les cases d'un des bateaux de votre adversaire, le jeu indiquera que vous l'avez coulé.
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+Après votre tour, vous pourrez assister à la frappe de votre adversaire. Appuyez sur espace pour passer à votre tour à nouveau.
 
-## Dependency Management
+Le joueur qui aura coulé tout les bateaux de l'adversaire aura gagné.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+## Construire (Build)
+### Windows : 
+À l'intérieur du dossier parent du projet :
+```
+gradlew.bat build
+gradlew.bat run
+```
+### Linux/MacOS :
+À l'intérieur du dossier parent du projet :
+```
+$ ./gradlew build
+$ ./gradlew run
+```
+
+## Structure :
+Ce projet fait usage de la LWJGL pour faire interface avec GLFW et OpenGL et utilise l'API *Socket* de Java pour faire la communication TCP/IP.
+![diagramme d'entité-relation](/README/ERD.png)

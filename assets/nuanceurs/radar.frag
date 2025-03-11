@@ -5,6 +5,7 @@ precision mediump float;
 in vec2 uv_O;
 in vec3 norm_O;
 in float z;
+in vec3 pos_O;
 
 uniform float temps;
 uniform int posPlateau;

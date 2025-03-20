@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL46;
 
 import jeu.Objet;
-import jeu.Plateau;
 import jeu.Scène;
 import maths.*;
 import utils.Ressources;
@@ -32,6 +31,8 @@ public class Peintre {
 		GL46.glClearColor(0.6f, 0.6f, 0.6f, 1f);
 
 		GL46.glEnable(GL46.GL_DEPTH_TEST);
+		//GL46.glEnable(GL46.GL_BLEND);
+
 		glErreur(true);
 	}
 

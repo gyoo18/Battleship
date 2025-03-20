@@ -106,12 +106,15 @@ public class GestionnaireContrôles {
     //cspell:ignore xoffset yoffset
     public static void surMolletteSourisRoulée(Fenêtre fenêtre, double xoffset, double yoffset){
         if (yoffset > 0){
-            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / ((float)yoffset + 0.05f));
+            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / (1.05f*(float)yoffset));
         }else{
-            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() * ((float)-yoffset + 0.05f));
+            caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() * (1.05f*(float)-yoffset));
         }
-        if(caméra.avoirVue().avoirRayon() > 2000f){
-            caméra.avoirVue().donnerRayon(2000f);
+        if(caméra.avoirVue().avoirRayon() > 4000f){
+            caméra.avoirVue().donnerRayon(4000f);
+        }
+        if(caméra.avoirVue().avoirRayon() < 10f){
+            caméra.avoirVue().donnerRayon(10f);
         }
     }
 

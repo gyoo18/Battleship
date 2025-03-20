@@ -67,3 +67,7 @@ tasks.distTar{
 tasks.distZip{
     dependsOn(copyAssets)
 }
+
+tasks.withType(JavaCompile){
+    options.encoding = 'UTF-8'
+}

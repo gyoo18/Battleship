@@ -3,8 +3,8 @@
 #version 460 core
 precision mediump float;
 
-in vec3 pos;
-in vec3 norm;
+layout (location=0) in vec3 pos;
+layout (location=1) in vec3 norm;
 
 uniform mat4 projection;
 uniform mat4 vue;

@@ -3,6 +3,10 @@ Le jeu classique à jouer entre amis, sur votre ordinateur.
 
 Ceci est ma soumission au défi de février du REI/UQODE
 
+![Exemple de jeu 1](/README/Exemple1.png)
+![Exemple de jeu 2](/README/Exemple2.png)
+![Exemple de jeu 3](/README/Exemple3.png)
+
 ## Comment jouer?
 ### Télécharger
 Téléchargez la dernière version dans la section [*Releases*](https://github.com/gyoo18/Battleship/releases) et décompressez le fichier. Dans le dossier bin, exécutez le fichier **Battleship.bat** sur Windows et **Battleship** sur Linux/MacOs.

@@ -3,7 +3,7 @@
 #version 460 core
 precision mediump float;
 
-in vec3 pos;
+layout (location=0) in vec3 pos;
 
 uniform mat4 transforme;
 uniform float ratio;

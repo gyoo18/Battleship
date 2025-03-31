@@ -7,9 +7,9 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 
-import Réseau.Communication;
 import contrôles.GestionnaireContrôles;
 import jeu.Scène;
+import réseau.Communication;
 import utils.Ressources;
 
 public class Fenêtre {
@@ -125,10 +125,10 @@ public class Fenêtre {
     public void mettreÀJour(){
         if (GLFW.glfwWindowShouldClose(glfwFenêtre)){
             actif = false;
-            Communication.couperCommunication();
-        } else if(Communication.communicationsCoupés()){
-            actif = false;
-        }
+            // Communication.couperCommunication();
+        } //else if(Communication.communicationsCoupés()){
+        //    actif = false;
+        //}
         
         peintre.mettreÀJour();
 

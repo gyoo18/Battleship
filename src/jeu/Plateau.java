@@ -2,7 +2,6 @@ package jeu;
 
 import java.util.ArrayList;
 
-import Réseau.Communication;
 import animations.GestionnaireAnimations;
 import animations.GestionnaireAnimations.Interpolation;
 //cspell:ignore énérateur Sélec
@@ -15,6 +14,7 @@ import maths.Maths;
 import maths.Transformée;
 import maths.Vec3;
 import maths.Vec4;
+import réseau.Communication;
 import utils.Chargeur;
 import utils.Ressources;
 
@@ -306,8 +306,8 @@ public class Plateau extends Objet {
         } else if(Ressources.étatJeu == Ressources.ÉtatJeu.BATAILLE_TOUR_A){
             if(Ressources.IDPointeurTouché == radar.ID && !pinesPos.contains(Ressources.pointeurSurvol)){
                 tirer(((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")),Ressources.pointeurSurvol);
-                Communication.envoyerCoup(Ressources.pointeurSurvol);
-                Ressources.transitionnerÀBatailleTourB();
+                Communication.envoyerInt("Coup",Ressources.pointeurSurvol);
+                Jeu.finiBatailleTourA = true;
             }
         }
     }
@@ -347,14 +347,14 @@ public class Plateau extends Objet {
             if(bateauxTouchés[collision] == bateauxLong[collision]){
                 bateauxCoulés[collision] = true;
                 res = TirRes.COULÉ;
-                Ressources.annoncerCoulé();
+                Jeu.annoncerCoulé();
 
                 boolean perdus = true;
                 for (int i = 0; i < N_BATEAUX; i++){
                     perdus = perdus && bateauxCoulés[i];
                 }
                 if(perdus){
-                    Ressources.annoncerGagnant();
+                    Jeu.annoncerGagnant();
                 }
             } else {
                 res = TirRes.TOUCHÉ;

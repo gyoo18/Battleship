@@ -1,4 +1,3 @@
-import Réseau.Communication;
 import animations.GestionnaireAnimations;
 import contrôles.GestionnaireContrôles;
 import graphiques.Fenêtre;
@@ -9,13 +8,20 @@ import graphiques.Peintre;
 import jeu.Objet;
 import jeu.Plateau;
 import jeu.Scène;
+import jeu.Jeu;
 import maths.Transformée;
 import maths.Vec3;
 import maths.Vec4;
+import réseau.Communication;
+import réseau.ConnectéCallback;
 import utils.Chargeur;
 import utils.Ressources;
 import utils.Ressources.ÉtatJeu;
+
 public class App {
+
+    public static boolean prêtÀJouer = false;
+
     public static void main(String[] args) throws Exception {
         Fenêtre fenêtre = new Fenêtre();
         Peintre peintre = new Peintre();
@@ -72,40 +78,21 @@ public class App {
         peintre.lierScène(scène);
         GestionnaireContrôles.initialiser(fenêtre);
 
-        Communication.Connecter();
-        Communication.attendrePlacementTerminé();
+        Communication.Connecter(new ConnectéCallback(){
+            @Override
+            public void connecté(){
+                App.prêtÀJouer = true;
+                Communication.envoyerByteListe("Plateau", ((Plateau) Ressources.scèneActuelle.obtenirObjet("Plateau")).enByteListe());
+            }
+        });
+        //Communication.attendrePlacementTerminé();
 
         plateauAdverse.avoirTransformée().positionner(new Vec3(0,0,4000f)).faireRotation(new Vec3(0,(float)Math.PI,0));
 
-        boolean prêtÀJouer = false;
         while (fenêtre.actif){
+            Jeu.miseÀJour();
             GestionnaireAnimations.mettreÀJourAnimations();
             fenêtre.mettreÀJour();
-            if(!prêtÀJouer && Ressources.étatJeu != ÉtatJeu.POSITIONNEMENT){
-                if( Communication.placementOpposantTerminé() ){
-                    prêtÀJouer = true;
-                    byte[] plateauAdverseBytes = null;
-                    if(Communication.estServeur){
-                        Ressources.transitionnerÀBatailleTourA();
-                    }else{
-                        Ressources.transitionnerÀBatailleTourB();
-                    }
-                    Communication.envoyerPlateau(plateau.enByteListe());
-                    Communication.attendrePlateau();
-                    while(plateauAdverseBytes == null){
-                        plateauAdverseBytes = Communication.plateauReçus();
-                    }
-                    plateauAdverse.lireBytes(plateauAdverseBytes);
-                }
-            }
-            if(Ressources.étatJeu == ÉtatJeu.BATAILLE_ATTENTE_TOUR_B){
-                int c = Communication.coupReçus();
-                if(c != -1){
-                    plateauAdverse.tirer(plateau, c);
-                    Communication.attendreCoup();
-                    Ressources.étatJeu = ÉtatJeu.BATAILLE_TOUR_B_JOUÉ;
-                }
-            }
         }
     }
 }

@@ -325,12 +325,12 @@ public class Transformée implements Animable{
 
     @Override
     public Object[] animClé() {
-        Object[] res = new Object[9];
+        Object[] res = new Object[6];
         res[0] = pos.copier();
         res[1] = rot.copier();
         res[2] = éch.copier();
         res[3] = rayon;
-        res[4] = parent!=null?parent.copier():null;
+        res[4] = parent!=null?parent:null;
         res[5] = mOrdre;
 
         return res;
@@ -338,12 +338,12 @@ public class Transformée implements Animable{
 
     @Override
     public boolean validerClé(Object[] c) {
-        if(c.length != 9 ||
+        if(c.length != 6 ||
             !(c[0] instanceof Vec3) ||
             !(c[1] instanceof Vec3) ||
             !(c[2] instanceof Vec3) ||
             !(c[3] instanceof Float)||
-            !(c[4] instanceof Transformée || c[7] == null) ||
+            !(c[4] instanceof Transformée) ||
             !(c[5] instanceof MOrdre)){
             return false;
         }
@@ -358,6 +358,9 @@ public class Transformée implements Animable{
         this.rayon = (float)cléB[3];
         this.parent = (Transformée)cléB[4];
         this.mOrdre = (MOrdre)cléB[5];
+        positionner(pos);
+        faireRotation(rot);
+        faireÉchelle(éch);
         estModifié = true;
         estInvModifié = true;
         nModifié++;

@@ -83,7 +83,7 @@ public class GestionnaireAnimations {
                 interpolations.remove(i);
                 fonctionFinAnimations.remove(i);
                 supplantables.remove(i);
-                break;
+                continue;
             }
 
             float m = (float)tempsÉcoulé.get(i)/(float)temps.get(i);

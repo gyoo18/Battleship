@@ -81,6 +81,7 @@ public class Jeu{
 
     public static void transitionnerConnecté(){
         Ressources.étatJeu = ÉtatJeu.POSITIONNEMENT;
+        Ressources.scèneActuelle.obtenirObjet("Texte Connexion").dessiner = false;
     }
 
     public static void avertirFinPlacement(){

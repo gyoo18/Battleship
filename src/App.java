@@ -59,12 +59,17 @@ public class App {
         Objet textePerdus = new Objet("Texte Perdus", textePerdusM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
         textePerdus.dessiner = false;
 
+        Maillage texteConnexionM = Chargeur.chargerOBJ("assets/maillages/texte_connexion.obj");
+        Objet texteConnexion = new Objet("Texte Connexion", texteConnexionM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
+        texteConnexion.dessiner = true;
+
         Maillage texteCouléM = Chargeur.chargerOBJ("assets/maillages/texte_coulé.obj");
         Objet texteCoulé = new Objet("Texte Coulé", texteCouléM, nuaTexte, new Vec4(0.8f,0.5f,0.2f,1.0f), null, new Transformée().positionner(new Vec3(0f,0f,0.1f)));
         texteCoulé.dessiner = false;
         scène.ajouterObjet(texteGagné);
         scène.ajouterObjet(textePerdus);
         scène.ajouterObjet(texteCoulé);
+        scène.ajouterObjet(texteConnexion);
 
         scène.caméra.avoirVue().estOrbite = true;
         scène.caméra.avoirVue().donnerRayon(1000).faireRotation(new Vec3(30f*(float)Math.PI/180f,0f,0f));

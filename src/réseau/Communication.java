@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import réseau.ConnectéCallback;
 
@@ -30,20 +32,12 @@ public class Communication {
         private ArrayList<String> headersReçus = new ArrayList<>();
         private ArrayList<Object> contenuReçus = new ArrayList<>();
         private Socket socket;
-        private DataInputStream input;
-        private DataOutputStream output;
         private boolean continuerCommunications = true;
         private boolean estCanalUtilisé = true;
         private boolean estContrôleDemandé = false;
 
         public AttenteCommunication(Socket socket){
             this.socket = socket;
-            try{
-                input = new DataInputStream(socket.getInputStream());
-                output = new DataOutputStream(socket.getOutputStream());
-            }catch(Exception e){
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -692,7 +686,22 @@ public class Communication {
             @Override
             public void run(){
                 try{
+                    Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
                     ip = "127.0.0.1"; //InetAddress.getLocalHost().toString().split("/")[1];
+                    while (e.hasMoreElements()){
+                        NetworkInterface n = (NetworkInterface)e.nextElement();
+                        Enumeration ee = n.getInetAddresses();
+                        while(ee.hasMoreElements()){
+                            InetAddress i = (InetAddress) ee.nextElement();
+                            if(i.isSiteLocalAddress() && i.toString().split("\\.").length == 4){
+                                ip = i.toString().split("/")[1];
+                                break;
+                            }
+                        }
+                        if(ip.compareTo("127.0.0.1") != 0){
+                            break;
+                        }
+                    }
                 }catch(Exception e){
                     System.err.println("[ERREUR] Le programme n'a pas pus lire l'adresse locale.");
                     e.printStackTrace();

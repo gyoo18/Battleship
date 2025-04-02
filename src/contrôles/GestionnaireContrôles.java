@@ -51,6 +51,7 @@ public class GestionnaireContrôles {
                 } else if (action == GLFW.GLFW_RELEASE){
                     ESPACE_PRESSÉ = false;
                 }
+                break;
             case GLFW.GLFW_KEY_RIGHT:{
                 caméraRotation.addi(new Vec2(1f*(float)Math.PI/180f,0f));
                 caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);

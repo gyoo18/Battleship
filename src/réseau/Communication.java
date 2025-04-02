@@ -22,6 +22,7 @@ public class Communication {
     //cspell:ignore serversocket
     public static boolean estServeur = true;
     public static boolean estConnecté = false;
+    public static boolean communicationsCoupés = false;
 
     private static ServerSocket serversocket;
     private static Socket socket;
@@ -35,6 +36,7 @@ public class Communication {
         private boolean continuerCommunications = true;
         private boolean estCanalUtilisé = true;
         private boolean estContrôleDemandé = false;
+        private boolean communicationsCoupés = false;
 
         public AttenteCommunication(Socket socket){
             this.socket = socket;
@@ -161,8 +163,12 @@ public class Communication {
                 }
                 headersReçus.add(header);
                 System.out.println("Fini de recevoir le contenu à "+System.currentTimeMillis());
-            }catch(IOException e){
-                //System.out.println("[ATTENTION] AttenteCommunication : timeout");
+                if(header.split(";")[0].split(":")[1].compareTo("Coupure des communications") == 0 && type.compareTo("bool") == 0){
+                    System.out.println("Signal reçus : coupure des communications");
+                    continuerCommunications = false;
+                    communicationsCoupés = true;
+                    socket.close();
+                }
             }catch(Exception e){
                 System.err.println("[ERREUR] AttenteCommunication.");
                 e.printStackTrace();
@@ -667,141 +673,165 @@ public class Communication {
                 return null;
             }
         }
+
+        public boolean communicationsCoupés(){
+            return communicationsCoupés;
+        }
+
+        public void couperCommunication(){
+            envoyerBool("Coupure des communications", true);
+            synchronized(this){
+                try {
+                    socket.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                communicationsCoupés = true;
+                continuerCommunications = false;
+            }
+        }
     }
 
-    public static AttenteCommunication attenteCommunication;
+    private static class ClientConnecterThread extends Thread {
+        public boolean continuerÀChercher = true;
+        public Socket socket;
+        private ConnectéCallback connectéCallback;
+        private boolean estÀTuer = false;
 
-    public static void Connecter(ConnectéCallback connectéCallback){
+        public ClientConnecterThread(ConnectéCallback connectéCallback){
+            this.connectéCallback = connectéCallback;
+        }
 
-        class ClientConnecterThread extends Thread {
-            public boolean continuerÀChercher = true;
-            public Socket socket;
-            private ConnectéCallback connectéCallback;
-            private boolean estÀTuer = false;
-
-            public ClientConnecterThread(ConnectéCallback connectéCallback){
-                this.connectéCallback = connectéCallback;
-            }
-
-            @Override
-            public void run(){
-                try{
-                    Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-                    ip = "127.0.0.1"; //InetAddress.getLocalHost().toString().split("/")[1];
-                    while (e.hasMoreElements()){
-                        NetworkInterface n = (NetworkInterface)e.nextElement();
-                        Enumeration ee = n.getInetAddresses();
-                        while(ee.hasMoreElements()){
-                            InetAddress i = (InetAddress) ee.nextElement();
-                            if(i.isSiteLocalAddress() && i.toString().split("\\.").length == 4){
-                                ip = i.toString().split("/")[1];
-                                break;
-                            }
-                        }
-                        if(ip.compareTo("127.0.0.1") != 0){
+        @Override
+        public void run(){
+            try{
+                Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+                ip = "127.0.0.1"; //InetAddress.getLocalHost().toString().split("/")[1];
+                while (e.hasMoreElements()){
+                    NetworkInterface n = (NetworkInterface)e.nextElement();
+                    Enumeration ee = n.getInetAddresses();
+                    while(ee.hasMoreElements()){
+                        InetAddress i = (InetAddress) ee.nextElement();
+                        if(i.isSiteLocalAddress() && i.toString().split("\\.").length == 4){
+                            ip = i.toString().split("/")[1];
                             break;
                         }
                     }
-                }catch(Exception e){
-                    System.err.println("[ERREUR] Le programme n'a pas pus lire l'adresse locale.");
-                    e.printStackTrace();
-                    ip = "127.0.0.1";
-                }
-                System.out.println("Ip du client : "+ip);
-                String[] ipPart = ip.split("\\.");
-                for (int i = 0; i < 256; i++){
-                    if (!continuerÀChercher){
+                    if(ip.compareTo("127.0.0.1") != 0){
                         break;
                     }
-
-                    try{
-                        this.socket = new Socket();
-                        this.socket.connect(new InetSocketAddress(ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i, 5000),100);
-                        System.out.println("L'adresse "+ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i+":5000 répond. Test d'authentification.");
-                        if (authentifierServeur(this.socket)){
-                            System.out.println("L'adresse correspond à un hôte.");
-                            synchronized(this.connectéCallback){
-                                connectéCallback.connecté();
-                            }
-                            this.continuerÀChercher = false;
-                        }else if(estÀTuer){
-                            break;
-                        }else{
-                            System.out.println("L'adresse ne correspond pas à un hôte.");
-                            //System.out.println("Socket fermé : "+this.socket);
-                            try{this.socket.close();}catch(Exception e){}
-                            this.socket = null;
-                        }
-                    }catch(Exception e){}
                 }
-
-                if(this.socket == null){
-                    System.out.println("Le jeu n'a pas pus trouver d'hôte.");
-                }
+            }catch(Exception e){
+                System.err.println("[ERREUR] Le programme n'a pas pus lire l'adresse locale.");
+                e.printStackTrace();
+                ip = "127.0.0.1";
             }
-
-            public void tuer(){
-                estÀTuer = true;
-                continuerÀChercher = false;
-            }
-        }
-
-        class ServeurConnecterThread extends Thread {
-            public ServerSocket serverSocket;
-            public Socket socket;
-            public boolean continuerÀAttendre = true;
-
-            private ConnectéCallback connectéCallback;
-            public ServeurConnecterThread(ConnectéCallback connectéCallback){
-                this.connectéCallback = connectéCallback;
-            }
-
-            @Override
-            public void run(){
-                try{
-                    this.serverSocket = new ServerSocket(5000);
-                    while(this.continuerÀAttendre){
-                        this.socket = serverSocket.accept();
-                        System.out.println("Client potentiel connecté.");
-                        if(authentifierClient(this.socket)){
-                            System.out.println("La connection correspond à un client.");
-                            synchronized(this.connectéCallback){
-                                this.connectéCallback.connecté();
-                            }
-                            this.continuerÀAttendre = false;
-                            break;
-                        }else{
-                            System.out.println("La connection ne correspond pas à un client.");
-                            this.socket.close();
-                        }
+            System.out.println("Ip du client : "+ip);
+            String[] ipPart = ip.split("\\.");
+            for (int i = 0; i < 256; i++){
+                synchronized(Communication.class){
+                    if (!continuerÀChercher || Communication.communicationsCoupés){
+                        break;
                     }
-                }catch(Exception e){
-                    e.printStackTrace();
                 }
+
+                try{
+                    this.socket = new Socket();
+                    this.socket.connect(new InetSocketAddress(ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i, 5000),100);
+                    System.out.println("L'adresse "+ipPart[0]+"."+ipPart[1]+"."+ipPart[2]+"."+i+":5000 répond. Test d'authentification.");
+                    if (authentifierServeur(this.socket)){
+                        System.out.println("L'adresse correspond à un hôte.");
+                        synchronized(this.connectéCallback){
+                            connectéCallback.connecté();
+                        }
+                        this.continuerÀChercher = false;
+                    }else if(estÀTuer){
+                        break;
+                    }else{
+                        System.out.println("L'adresse ne correspond pas à un hôte.");
+                        //System.out.println("Socket fermé : "+this.socket);
+                        try{this.socket.close();}catch(Exception e){}
+                        this.socket = null;
+                    }
+                }catch(Exception e){}
+            }
+
+            if(this.socket == null){
+                System.out.println("Le jeu n'a pas pus trouver d'hôte.");
             }
         }
 
-        class ConnecterThread extends Thread {
-            private ConnectéCallback connectéCallback;
-            private ClientConnecterThread client;
-            private ServeurConnecterThread serveur;
+        public void tuer(){
+            estÀTuer = true;
+            continuerÀChercher = false;
+        }
+    }
 
-            public ConnecterThread(ConnectéCallback connectéCallback){
-                this.connectéCallback = connectéCallback;
+    private static class ServeurConnecterThread extends Thread {
+        public ServerSocket serverSocket;
+        public Socket socket;
+        public boolean continuerÀAttendre = true;
+
+        private ConnectéCallback connectéCallback;
+        public ServeurConnecterThread(ConnectéCallback connectéCallback){
+            this.connectéCallback = connectéCallback;
+        }
+
+        @Override
+        public void run(){
+            try{
+                this.serverSocket = new ServerSocket(5000);
+                boolean communicationsCoupés = false;
+                synchronized(Communication.class){
+                    communicationsCoupés = Communication.communicationsCoupés;
+                }
+                while(this.continuerÀAttendre && !communicationsCoupés){
+                    serverSocket.setSoTimeout(12000);
+                    this.socket = serverSocket.accept();
+                    System.out.println("Client potentiel connecté.");
+                    if(authentifierClient(this.socket)){
+                        System.out.println("La connection correspond à un client.");
+                        synchronized(this.connectéCallback){
+                            this.connectéCallback.connecté();
+                        }
+                        this.continuerÀAttendre = false;
+                        break;
+                    }else{
+                        System.out.println("La connection ne correspond pas à un client.");
+                        this.socket.close();
+                    }
+                }
+            }catch(Exception e){
+                e.printStackTrace();
             }
+        }
+    }
 
-            @Override
-            public void run(){
-                client = new ClientConnecterThread(new ConnectéCallback(){
+    private static class ConnecterThread extends Thread {
+        private ConnectéCallback connectéCallback;
+
+        public ConnecterThread(ConnectéCallback connectéCallback){
+            this.connectéCallback = connectéCallback;
+        }
+
+        @Override
+        public void run(){
+            synchronized(Communication.class){
+                Communication.clientConnecterThread = new ClientConnecterThread(new ConnectéCallback(){
                     @Override
                     public void connecté(){
+                        synchronized(Communication.class){
+                            if(Communication.communicationsCoupés){
+                                return;
+                            }
+                        }
                         System.out.println("Je suis devenus un client");
                         Socket socket;
-                        synchronized (client) {
-                            socket = client.socket;
+                        synchronized (Communication.clientConnecterThread) {
+                            socket = Communication.clientConnecterThread.socket;
                         }
-                        synchronized (serveur){
-                            serveur.continuerÀAttendre = false;
+                        synchronized (Communication.serveurConnecterThread){
+                            Communication.serveurConnecterThread.continuerÀAttendre = false;
                         }
                         synchronized (Communication.class){
                             Communication.estConnecté = true;
@@ -816,18 +846,23 @@ public class Communication {
                     }
                 });
 
-                serveur = new ServeurConnecterThread(new ConnectéCallback(){
+                Communication.serveurConnecterThread = new ServeurConnecterThread(new ConnectéCallback(){
                     @Override
                     public void connecté(){
+                        synchronized(Communication.class){
+                            if(Communication.communicationsCoupés){
+                                return;
+                            }
+                        }
                         System.out.println("Je suis devenus un serveur");
                         Socket socket = null;
                         ServerSocket serverSocket = null;
-                        synchronized (serveur) {
-                            socket = serveur.socket;
-                            serversocket = serveur.serverSocket;
+                        synchronized (Communication.serveurConnecterThread) {
+                            socket = Communication.serveurConnecterThread.socket;
+                            serversocket = Communication.serveurConnecterThread.serverSocket;
                         }
-                        synchronized (client){
-                            client.tuer();
+                        synchronized (Communication.clientConnecterThread){
+                            Communication.clientConnecterThread.tuer();
                         }
                         synchronized (Communication.class){
                             Communication.estConnecté = true;
@@ -844,13 +879,21 @@ public class Communication {
                     }
                 });
 
-                client.start();
-                serveur.start();
+                Communication.clientConnecterThread.start();
+                Communication.serveurConnecterThread.start();
             }
         }
+    }
 
-        ConnecterThread connecter = new ConnecterThread(connectéCallback);
-        connecter.start();
+    public static AttenteCommunication attenteCommunication = null;
+    public static ClientConnecterThread clientConnecterThread = null;
+    public static ServeurConnecterThread serveurConnecterThread = null;
+    public static ConnecterThread connecterThread = null;
+
+    public static void Connecter(ConnectéCallback connectéCallback){
+
+        connecterThread = new ConnecterThread(connectéCallback);
+        connecterThread.start();
     }
 
     private static boolean authentifierServeur(Socket connection){
@@ -917,32 +960,42 @@ public class Communication {
     }
 
     public static void couperCommunication(){
-        // synchronized(attenteRéponse){
-        //     attenteRéponse.continuer = false;
-        //     attenteRéponse.interrupt();
-        // }
-        try {
-            System.out.println("Coupure des communications");
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        System.out.println("Coupure des communications");
+        if(!communicationsCoupés() && attenteCommunication != null){
+            attenteCommunication.couperCommunication();
         }
+        try {socket.close();} catch (Exception e) {e.printStackTrace();}
+        if(estServeur){
+            try {serversocket.close();} catch (Exception e) {e.printStackTrace();}
+        }
+        try {clientConnecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+        try {synchronized(serveurConnecterThread.serverSocket){serveurConnecterThread.serverSocket.close();}} catch (Exception e) {e.printStackTrace();}
+        try {serveurConnecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+        try {connecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+        communicationsCoupés = true;
+        estConnecté = false;
     }
 
     public static boolean communicationsCoupés(){
-        // if (attenteRéponse.communicationsCoupés){
-        //     try {
-        //         System.out.println("Les communications ont été coupées");
-        //         input.close();
-        //         output.close();
-        //         socket.close();
-        //         return true;
-        //     } catch (IOException e) {
-        //         e.printStackTrace();
-        //         return true;
-        //     }
-        // }
-        return false;
+        if (communicationsCoupés){
+            return true;
+        }
+        if(attenteCommunication != null && attenteCommunication.communicationsCoupés()){
+            communicationsCoupés = true;
+            estConnecté = false;
+            try {socket.close();} catch (Exception e) {e.printStackTrace();}
+            if(estServeur){
+                try {serversocket.close();} catch (Exception e) {e.printStackTrace();}
+            }
+
+            try {clientConnecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+            try {synchronized(serveurConnecterThread.serverSocket){serveurConnecterThread.serverSocket.close();}} catch (Exception e) {e.printStackTrace();}
+            try {serveurConnecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+            try {connecterThread.interrupt();} catch (Exception e) {e.printStackTrace();}
+            return true;
+        }else{
+            return false;
+        }
     }
 
     public static void envoyerString(String nom, String contenu){

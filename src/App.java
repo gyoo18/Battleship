@@ -99,5 +99,7 @@ public class App {
             GestionnaireAnimations.mettreÀJourAnimations();
             fenêtre.mettreÀJour();
         }
+        Communication.couperCommunication();
+        fenêtre.détruire();
     }
 }

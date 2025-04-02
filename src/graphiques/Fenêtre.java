@@ -125,10 +125,9 @@ public class Fenêtre {
     public void mettreÀJour(){
         if (GLFW.glfwWindowShouldClose(glfwFenêtre)){
             actif = false;
-            // Communication.couperCommunication();
-        } //else if(Communication.communicationsCoupés()){
-        //    actif = false;
-        //}
+        }else if(Communication.communicationsCoupés()){
+            actif = false;
+        }
         
         peintre.mettreÀJour();
 

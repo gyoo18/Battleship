@@ -219,13 +219,14 @@ public class Communication {
                 try{
                     output.writeUTF("Communication demandee");
                     System.out.println("Demande de communication envoyée à "+System.currentTimeMillis());
-                    socket.setSoTimeout(300);
+                    socket.setSoTimeout(1000);
                     String message = input.readUTF();
                     if (message.compareTo("Communication acceptee") == 0){
                         break;
                     }else if(message.compareTo("Communication demandee") == 0 && Communication.estServeur){
                         System.out.println("Contre-demande de communication reçue. Le serveur accepte à "+System.currentTimeMillis());
-                        try {Thread.sleep(20);} catch (Exception e) {e.printStackTrace();}
+                        try {Thread.sleep(300);} catch (Exception e) {e.printStackTrace();}
+                        input.readUTF();    // Effacer la deuxième demande du client
                         output.writeUTF("Communication acceptee");
                         System.out.println("Demande communication acceptée à "+System.currentTimeMillis());
                         lireMessage();
@@ -233,18 +234,14 @@ public class Communication {
                         try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
                         demanderContrôleCanal();
                         continue;
+                    }else if(message.compareTo("Communication demandee") == 0 && !Communication.estServeur){
+                        System.err.println("[ERREUR] Réponse inatendue à "+System.currentTimeMillis());
+                        continue;
                     }else{
                         System.err.println("[ERREUR] Réponse inatendue à "+System.currentTimeMillis());
                         continue;
                     }
-                }catch(IOException e){
-                    try{
-                        System.out.println("[ATTENTION] timeout, available : "+input.available());
-                    }catch(Exception f){
-                        f.printStackTrace();
-                    }
-                }
-                catch(Exception e){
+                }catch(Exception e){
                     e.printStackTrace();
                 }
             }
@@ -641,28 +638,23 @@ public class Communication {
             demanderCommunication();
             try{
                 while(true){
-                    //System.out.println("Socket status : "+this.socket+", "+this.socket.isOutputShutdown()+", "+this.socket.isOutputShutdown()+", "+this.socket.isConnected());
-                    try{
-                        System.out.println("Envoie de byte[]");
-                        output.writeUTF("NOM:"+nom+";TYPE:byte[];ID:"+Communication.ID);
-                        System.out.println("Envoyé header à : "+System.currentTimeMillis());
-                        this.socket.setSoTimeout(1000);
-                        String message = input.readUTF();
-                        if( message.compareTo("Header recus") != 0 ){
-                            System.err.println("[ERREUR] AttenteCommunication.envoyerByteListe : Reçus réponse inattendue : "+message);
-                            continue;
-                        }
-                        System.out.println("Reçus confirmation à "+System.currentTimeMillis());
-                        try{Thread.sleep(20);}catch(Exception e){e.printStackTrace();}
-                        output.writeInt(contenu.length);
-                        output.write(contenu);
-                        output.flush();
-                        System.out.println("Envoyé contenu à "+System.currentTimeMillis());
-                        relâcherContrôleCanal();
-                        return;
-                    }catch(IOException e){
-                        System.err.println("[ATTENTION] AttenteCommunication.envoyerByteListe : timeout à "+System.currentTimeMillis());
+                    System.out.println("Envoie de byte[]");
+                    output.writeUTF("NOM:"+nom+";TYPE:byte[];ID:"+Communication.ID);
+                    System.out.println("Envoyé header à : "+System.currentTimeMillis());
+                    this.socket.setSoTimeout(1000);
+                    String message = input.readUTF();
+                    if( message.compareTo("Header recus") != 0 ){
+                        System.err.println("[ERREUR] AttenteCommunication.envoyerByteListe : Reçus réponse inattendue : "+message);
+                        continue;
                     }
+                    System.out.println("Reçus confirmation à "+System.currentTimeMillis());
+                    try{Thread.sleep(20);}catch(Exception e){e.printStackTrace();}
+                    output.writeInt(contenu.length);
+                    output.write(contenu);
+                    output.flush();
+                    System.out.println("Envoyé contenu à "+System.currentTimeMillis());
+                    relâcherContrôleCanal();
+                    return;
                 }
             }catch(Exception e){
                 relâcherContrôleCanal();
@@ -945,43 +937,113 @@ public class Communication {
     }
 
     public static void envoyerString(String nom, String contenu){
-        attenteCommunication.envoyerString(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerString(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerChar(String nom, char contenu){
-        attenteCommunication.envoyerChar(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerChar(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerByte(String nom, byte contenu){
-        attenteCommunication.envoyerByte(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerByte(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerShort(String nom, short contenu){
-        attenteCommunication.envoyerShort(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerShort(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerInt(String nom, int contenu){
-        attenteCommunication.envoyerInt(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerInt(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerLong(String nom, long contenu){
-        attenteCommunication.envoyerLong(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerLong(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerFloat(String nom, float contenu){
-        attenteCommunication.envoyerFloat(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerFloat(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerDouble(String nom, double contenu){
-        attenteCommunication.envoyerDouble(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerDouble(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerBool(String nom, boolean contenu){
-        attenteCommunication.envoyerBool(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerBool(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static void envoyerByteListe(String nom, byte[] contenu){
-        attenteCommunication.envoyerByteListe(nom, contenu);
+        class Fil extends Thread{
+            @Override
+            public void run(){
+                attenteCommunication.envoyerByteListe(nom, contenu);
+            }
+        }
+        Fil fil = new Fil();
+        fil.start();
     }
 
     public static Object[] obtenirMessage(String nom){

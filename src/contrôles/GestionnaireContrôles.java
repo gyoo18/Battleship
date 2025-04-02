@@ -30,7 +30,7 @@ public class GestionnaireContrôles {
         caméra = fenêtre.scène.caméra;
         scène = fenêtre.scène;
         plateau = (Plateau)fenêtre.scène.obtenirObjet("Plateau");
-        caméraRotation = new Vec2(caméra.avoirRot().y*1000f/(float)Math.PI,caméra.avoirRot().x*1000f/(float)Math.PI);
+        caméraRotation = new Vec2(caméra.avoirRot().y/(float)Math.PI,caméra.avoirRot().x/(float)Math.PI);
     }
 
     //cspell:ignore codescan
@@ -51,15 +51,59 @@ public class GestionnaireContrôles {
                 } else if (action == GLFW.GLFW_RELEASE){
                     ESPACE_PRESSÉ = false;
                 }
+            case GLFW.GLFW_KEY_RIGHT:{
+                caméraRotation.addi(new Vec2(1f*(float)Math.PI/180f,0f));
+                caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);
+                fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y , (float)-Math.PI*(float)caméraRotation.x, 0));
+                break;
+            }
+            case GLFW.GLFW_KEY_LEFT:{
+                caméraRotation.addi(new Vec2(-1f*(float)Math.PI/180f,0f));
+                caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);
+                fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y , (float)-Math.PI*(float)caméraRotation.x, 0));
+                break;
+            }
+            case GLFW.GLFW_KEY_UP:{
+                caméraRotation.addi(new Vec2(0f,-1f*(float)Math.PI/180f));
+                caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);
+                fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y , (float)-Math.PI*(float)caméraRotation.x, 0));
+                break;
+            }
+            case GLFW.GLFW_KEY_DOWN:{
+                caméraRotation.addi(new Vec2(0f,1f*(float)Math.PI/180f));
+                caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);
+                fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y , (float)-Math.PI*(float)caméraRotation.x, 0));
+                break;
+            }
+            case GLFW.GLFW_KEY_Z:{
+                caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() / 1.05f);
+                if(caméra.avoirVue().avoirRayon() > 4000f){
+                    caméra.avoirVue().donnerRayon(4000f);
+                }
+                if(caméra.avoirVue().avoirRayon() < 10f){
+                    caméra.avoirVue().donnerRayon(10f);
+                }
+                break;
+            }
+            case GLFW.GLFW_KEY_X:{
+                caméra.avoirVue().donnerRayon(caméra.avoirVue().avoirRayon() * 1.05f);
+                if(caméra.avoirVue().avoirRayon() > 4000f){
+                    caméra.avoirVue().donnerRayon(4000f);
+                }
+                if(caméra.avoirVue().avoirRayon() < 10f){
+                    caméra.avoirVue().donnerRayon(10f);
+                }
+                break;
+            }
         }
     }
     //cspell:ignore xpos, ypos
     public static void surCurseurBouge(Fenêtre fenêtre, double xpos, double ypos){
         if (CTRL_PRESSÉ){
             Vec2 dep = new Vec2((float)xpos,(float)ypos).sous(positionPrécédenteCurseur).opposé();
-            caméraRotation.addi(dep);
-            caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -(float)Ressources.fenêtreHauteur*(float)Math.PI/6f);
-            fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y/(float)Ressources.fenêtreHauteur , (float)-Math.PI*(float)caméraRotation.x/(float)Ressources.fenêtreLargeur, 0));
+            caméraRotation.addi(dep.div(new Vec2((float)Ressources.fenêtreHauteur,(float)Ressources.fenêtreLargeur)));
+            caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -0.5f);
+            fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y , (float)-Math.PI*(float)caméraRotation.x, 0));
         } else {
             // Comme la transformée de la caméra est en mode Orbite, caméra.avoirPos() renvoie (0,0,rayon).
             // Il faut donc manuellement calculer la position de la caméra.

@@ -32,12 +32,13 @@ public class Jeu{
                 if(!reçusPlateauAdverse){
                     Object[] plateau = Communication.obtenirMessage("Plateau");
                     if(plateau != null){
+                        System.out.println("Plateau reçus");
                         ArrayList<Byte> plat = ((ArrayList<Byte>)plateau[1]);
                         byte[] plateauBytes = new byte[plat.size()];
                         for (int i = 0; i < plat.size(); i++){
                             plateauBytes[i] = plat.get(i);
                         }
-                        ((Plateau) Ressources.scèneActuelle.obtenirObjet("Plateau")).lireBytes(plateauBytes);
+                        ((Plateau) Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")).lireBytes(plateauBytes);
                         reçusPlateauAdverse = true;
                     }
                 }
@@ -83,10 +84,19 @@ public class Jeu{
     }
 
     public static void avertirFinPlacement(){
-        Communication.envoyerBool("Positionnement Terminé", true);
+        System.out.println("La phase de placement est terminée.");
+        Communication.envoyerByteListe("Plateau Adverse",((Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau")).enByteListe());
     }
     public static void attendreAdversaireFiniPlacement(){
-        if (Communication.obtenirMessage("Positionnement Terminé") != null){
+        Object[] message = Communication.obtenirMessage("Plateau Adverse");
+        if(message != null){
+            System.out.println("Plateau Adverse Reçus");
+            ArrayList<Byte> plat = ((ArrayList<Byte>)message[1]);
+            byte[] plateau = new byte[plat.size()];
+            for (int i = 0; i < plat.size(); i++){
+                plateau[i] = plat.get(i);
+            }
+            ((Plateau) Ressources.scèneActuelle.obtenirObjet("Plateau Adverse")).lireBytes(plateau);
             transitionnerPremierTour();
         }
     }
@@ -99,6 +109,7 @@ public class Jeu{
     }
 
     public static void transitionnerÀBatailleTourA(){
+        System.out.println("Transition au tour A");
         if(Ressources.étatJeu != ÉtatJeu.B_GAGNÉ && Ressources.étatJeu != ÉtatJeu.A_GAGNÉ){
             Plateau plateau = (Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourA();
@@ -120,6 +131,7 @@ public class Jeu{
     }
 
     public static void transitionnerÀBatailleTourB(){
+        System.out.println("Transition au tour B");
         if(Ressources.étatJeu != ÉtatJeu.B_GAGNÉ && Ressources.étatJeu != ÉtatJeu.A_GAGNÉ){
             Plateau plateau = (Plateau)Ressources.scèneActuelle.obtenirObjet("Plateau");
             plateau.transitionnerÀBatailleTourB();

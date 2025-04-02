@@ -8,7 +8,7 @@ import utils.Ressources;
 
 public class Caméra implements Animable {
     
-    public float FOV = 50f;
+    public float FOV = 70f;
     public float planProche = 0.01f;
     public float planLoin = 100f;
     private float ratio = Ressources.ratioFenêtre;

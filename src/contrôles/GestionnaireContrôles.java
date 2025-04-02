@@ -58,7 +58,8 @@ public class GestionnaireContrôles {
         if (CTRL_PRESSÉ){
             Vec2 dep = new Vec2((float)xpos,(float)ypos).sous(positionPrécédenteCurseur).opposé();
             caméraRotation.addi(dep);
-            fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y/1000f, (float)-Math.PI*(float)caméraRotation.x/1000f, 0));
+            caméraRotation.y = Math.max( Math.min( caméraRotation.y, 0f), -(float)Ressources.fenêtreHauteur*(float)Math.PI/6f);
+            fenêtre.scène.caméra.faireRotation(new Vec3((float)Math.PI*(float)caméraRotation.y/(float)Ressources.fenêtreHauteur , (float)-Math.PI*(float)caméraRotation.x/(float)Ressources.fenêtreLargeur, 0));
         } else {
             // Comme la transformée de la caméra est en mode Orbite, caméra.avoirPos() renvoie (0,0,rayon).
             // Il faut donc manuellement calculer la position de la caméra.
